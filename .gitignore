@@ -1,0 +1,16 @@
+# macOS
+.DS_Store
+
+__pycache__/
+*.pyc
+.venv/
+venv/
+env/
+
+.env
+
+.vscode/
+
+.metadata/
+*.dbeaver-data-sources.xml
+*.dbeaver-project
