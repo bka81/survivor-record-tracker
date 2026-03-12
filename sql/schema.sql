@@ -20,11 +20,11 @@ CREATE TABLE Facility (
 
 CREATE TABLE TransferEvent (
     transferID INT PRIMARY KEY,
-    SurvivorID INT, 
-    toFacilityID INT,
-    userID INT,
+    SurvivorID INT NOT NULL, 
+    toFacilityID INT NOT NULL,
+    userID INT NOT NULL,
     fromFacilityID INT,
-    transferTime TIME,
+    transferTime TIME NOT NULL,
 
     FOREIGN KEY(SurvivorID) references SurvivorRecord(SurvivorID),
     FOREIGN KEY(toFacilityID) references Facility(toFacilityID),
@@ -33,8 +33,8 @@ CREATE TABLE TransferEvent (
 );
 
 CREATE TABLE TransferNote (
-    noteNo INT PRIMARY KEY,
-    transferID INT,
+    noteNo INT PRIMARY KEY NOT NULL,
+    transferID INT NOT NULL,
     witnessName VARCHAR(150),
     noteText TEXT,
     tagSeen VARCHAR(100),
