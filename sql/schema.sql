@@ -1,3 +1,6 @@
+CREATE DATABASE IF NOT EXISTS transfer_db;
+USE transfer_db; 
+
 CREATE TABLE Users(
 	userID INT PRIMARY KEY,
 	firstName VARCHAR(100) NOT NULL,
@@ -24,9 +27,6 @@ CREATE TABLE Reviewer(
 	userID INT PRIMARY KEY,
 	CONSTRAINT reviewer_user_fk FOREIGN KEY (userID) REFERENCES Users(userID)
 );
-
-CREATE DATABASE IF NOT EXISTS transfer_db;
-USE transfer_db; 
 
 CREATE TABLE Organization (
     orgID INT NOT NULL,
