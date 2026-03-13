@@ -66,7 +66,30 @@ CREATE TABLE TransferNote (
     tagSeen VARCHAR(100),
 
     FOREIGN KEY(transferID) references TransferEvent(transferID)
-)
+);
+
+CREATE TABLE SurvivorRecord (
+	survivorID INT PRIMARY KEY,
+	aliasTag VARCHAR(100), 
+	isMinor BOOLEAN NOT NULL, 
+	currentFacilityLocation INT, 
+	status VARCHAR(50) NOT NULL,
+	
+	FOREIGN KEY(currentFacilityLocation) REFERENCES Facility(facilityID), 
+	CONSTRAINT check_status CHECK(status IN ('Active', 'Reunited', 'Deceased', )
+	);
+	
+CREATE TABLE Flag (
+	flagID INT PRIMARY KEY, 
+	userID INT NOT NULL, 
+	survivorID INT NOT NULL, 
+	status VARCHAR(50) NOT NULL, 
+	description VARCHAR(255), 
+	category VARCHAR(100) NOT NULL,
+	
+	CONSTRAINT responder_user_fk FOREIGN KEY (userID) REFERENCES Users(userID)
+	CONSTRAINT facilityStaff_facility_fk FOREIGN KEY (facilityID) REFERENCES Facility(facilityID)
+	);
 
 
 
