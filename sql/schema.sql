@@ -82,5 +82,6 @@ CREATE TABLE Flag (
     createdAt DATETIME NOT NULL,
     category VARCHAR(100) NOT NULL,
     CONSTRAINT flag_user_fk FOREIGN KEY (userID) REFERENCES Reviewer(userID),
-    CONSTRAINT flag_survivor_fk FOREIGN KEY (survivorID) REFERENCES SurvivorRecord(survivorID)
+    CONSTRAINT flag_survivor_fk FOREIGN KEY (survivorID) REFERENCES SurvivorRecord(survivorID),
+    CONSTRAINT check_flag_status CHECK (flagStatus IN ('Open', 'Resolved'))
 );
