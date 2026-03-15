@@ -2,7 +2,6 @@ DROP DATABASE IF EXISTS survivor_record_tracking;
 CREATE DATABASE survivor_record_tracking;
 USE survivor_record_tracking;
 
--- all CREATE TABLE statements
 CREATE TABLE Users (
     userID INT PRIMARY KEY,
     firstName VARCHAR(100) NOT NULL,
@@ -87,7 +86,8 @@ CREATE TABLE Flag (
     CONSTRAINT flag_survivor_fk FOREIGN KEY (survivorID) REFERENCES SurvivorRecord(survivorID),
     CONSTRAINT check_flag_status CHECK (flagStatus IN ('Open', 'Resolved'))
 );
--- all INSERT statements
+
+
 INSERT INTO Organization (orgID, orgType, orgName)
 VALUES
 (1, 'Government', 'Provincial Emergency Services'),
@@ -191,6 +191,7 @@ VALUES
 (7, 312, 101, 'Open', 'Another possible duplicate entry reported by shelter staff', '2026-03-15 14:00:00', 'Duplicate Record'),
 (8, 313, 102, 'Resolved', 'Additional missing ID concern logged during review', '2026-03-15 14:10:00', 'Missing Information');
 
+-- selecting survivors who have been flagged more than once
 SELECT survivorID, firstName, lastName
 FROM SurvivorRecord
 WHERE survivorID IN (
