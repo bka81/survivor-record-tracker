@@ -46,8 +46,8 @@ CREATE TABLE Reviewer (
 CREATE TABLE DisasterEvent (
     disasterID INT PRIMARY KEY,
     disasterType VARCHAR(50) NOT NULL,
-    location VARCHAR(150),
-    disasterDateTime DATETIME,
+    location VARCHAR(150) NOT NULL,
+    disasterDateTime DATETIME NOT NULL,
     CONSTRAINT check_disaster_type CHECK (disasterType IN ('Earthquake', 'Flood', 'Wildfire', 'Hurricane', 'Tornado', 'Tsunami', 'Landslide', 'Other'))
 );
 
