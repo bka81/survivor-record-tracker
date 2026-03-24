@@ -43,6 +43,14 @@ CREATE TABLE Reviewer (
     CONSTRAINT reviewer_user_fk FOREIGN KEY (userID) REFERENCES Users(userID)
 );
 
+CREATE TABLE DisasterEvent (
+    disasterID INT PRIMARY KEY,
+    disasterType VARCHAR(50) NOT NULL,
+    location VARCHAR(150),
+    disasterDateTime DATETIME,
+    CONSTRAINT check_disaster_type CHECK (disasterType IN ('Earthquake', 'Flood', 'Wildfire', 'Hurricane', 'Tornado', 'Tsunami', 'Landslide', 'Other'))
+);
+
 CREATE TABLE SurvivorRecord (
     survivorID INT PRIMARY KEY,
     firstName VARCHAR(100),
@@ -50,6 +58,8 @@ CREATE TABLE SurvivorRecord (
     aliasTag VARCHAR(100),
     isMinor BOOLEAN NOT NULL,
     status VARCHAR(50) NOT NULL,
+    disasterID INT NOT NULL,
+    CONSTRAINT survivor_disaster_fk FOREIGN KEY (disasterID) REFERENCES DisasterEvent(disasterID),
     CONSTRAINT check_status CHECK (status IN ('Active', 'Reunited', 'Deceased', 'Unknown', 'Closed'))
 );
 
@@ -153,14 +163,22 @@ VALUES
 (314),
 (315);
 
-INSERT INTO SurvivorRecord (survivorID, firstName, lastName, aliasTag, isMinor, status)
+INSERT INTO DisasterEvent (disasterID, disasterType, location, disasterDateTime)
 VALUES
-(101, 'Adam', 'Smith', NULL, FALSE, 'Active'),
-(102, 'Bella', 'Jones', NULL, TRUE, 'Active'),
-(103, NULL, NULL, 'Unknown1', TRUE, 'Unknown'),
-(104, 'Chris', 'Taylor', 'Mouse', FALSE, 'Active'),
-(105, 'Mina', 'Ali', 'Bat', FALSE, 'Reunited'),
-(106, NULL, NULL, 'Unknown2', TRUE, 'Unknown');
+(1, 'Wildfire', 'North Region, Cascade Mountains', '2026-03-14 14:30:00'),
+(2, 'Earthquake', 'Westside Urban District', '2026-03-14 08:15:00'),
+(3, 'Flood', 'River Valley, South County', '2026-03-13 22:00:00'),
+(4, 'Wildfire', 'East Hills, Pine Forest', '2026-03-15 01:45:00'),
+(5, 'Tornado', 'Central Plains, Springfield', '2026-03-12 16:20:00');
+
+INSERT INTO SurvivorRecord (survivorID, firstName, lastName, aliasTag, isMinor, status, disasterID)
+VALUES
+(101, 'Adam', 'Smith', NULL, FALSE, 'Active', 1),
+(102, 'Bella', 'Jones', NULL, TRUE, 'Active', 4),
+(103, NULL, NULL, 'Unknown1', TRUE, 'Unknown', 3),
+(104, 'Chris', 'Taylor', 'Mouse', FALSE, 'Active', 5),
+(105, 'Mina', 'Ali', 'Bat', FALSE, 'Reunited', 2),
+(106, NULL, NULL, 'Unknown2', TRUE, 'Unknown', 2);
 
 INSERT INTO TransferEvent (transferID, survivorID, toFacilityID, userID, fromFacilityID, transferTime)
 VALUES
