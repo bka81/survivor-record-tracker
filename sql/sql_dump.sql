@@ -97,7 +97,6 @@ CREATE TABLE Flag (
     CONSTRAINT check_flag_status CHECK (flagStatus IN ('Open', 'Resolved'))
 );
 
-
 INSERT INTO Organization (orgID, orgType, orgName)
 VALUES
 (1, 'Government', 'Provincial Emergency Services'),
@@ -187,7 +186,10 @@ VALUES
 (3, 103, 203, 303, 403, '2026-03-15 11:40:00'),
 (4, 104, 204, 306, 404, '2026-03-15 11:45:00'),
 (5, 105, 205, 307, 405, '2026-03-15 12:00:00'),
-(6, 106, 206, 308, 406, '2026-03-15 12:02:00');
+(6, 106, 206, 308, 406, '2026-03-15 12:02:00'),
+(7, 102, 203, 303, 201, '2026-03-15 14:00:00'),
+(8, 106, 204, 303, 206, '2026-03-15 14:30:00'),
+(9, 106, 203, 303, 204, '2026-03-15 15:00:00');
 
 INSERT INTO TransferNote (transferID, noteNo, noteText)
 VALUES
@@ -217,3 +219,203 @@ WHERE survivorID IN (
 	FROM Flag
 	GROUP BY survivorID, category
 HAVING COUNT(*) > 1);
+
+-- Queries for part 3 : 
+-- Join query : 
+-- This query shows the full transfer timeline for a SPECIFIC surivior (with id = 101) including which facilites they were moved between
+-- and who handeld the transfer
+SELECT 
+    s.survivorID,
+    s.firstName,
+    s.aliasTag,
+    s.status,
+    f1.facilityName AS fromFacility,
+    f2.facilityName AS toFacility,
+    u.firstName AS handledBy,
+    t.transferTime
+FROM TransferEvent t
+JOIN SurvivorRecord s ON t.survivorID = s.survivorID
+LEFT JOIN Facility f1 ON t.fromFacilityID = f1.facilityID
+JOIN Facility f2 ON t.toFacilityID = f2.facilityID
+JOIN Users u ON t.userID = u.userID
+WHERE s.survivorID = 101
+ORDER BY t.transferTime;
+
+-- OR : 
+-- This query shows the full transfer timeline for ALL survivors, ordered by survivor and then by transfer time
+SELECT 
+    s.survivorID,
+    s.firstName,
+    s.aliasTag,
+    s.status,
+    f1.facilityName AS fromFacility,
+    f2.facilityName AS toFacility,
+    u.firstName AS handledBy,
+    t.transferTime
+FROM TransferEvent t
+JOIN SurvivorRecord s ON t.survivorID = s.survivorID
+LEFT JOIN Facility f1 ON t.fromFacilityID = f1.facilityID
+JOIN Facility f2 ON t.toFacilityID = f2.facilityID
+JOIN Users u ON t.userID = u.userID
+ORDER BY s.survivorID, t.transferTime;
+
+-- Division query : 
+-- find responders who handled all minor survivors
+SELECT u.firstName, u.lastName
+FROM Users u
+JOIN Responder r ON u.userID = r.userID
+WHERE NOT EXISTS (
+    SELECT s.survivorID
+    FROM SurvivorRecord s
+    WHERE s.isMinor = TRUE
+    AND NOT EXISTS (
+        SELECT t.transferID
+        FROM TransferEvent t
+        WHERE t.survivorID = s.survivorID
+        AND t.userID = u.userID
+    )
+);
+
+-- OR : *Disaster Specific* 
+-- finding responders who handeld ALL MINOR SURVIVORS of Wildfires : 
+SELECT u.firstName, u.lastName
+FROM Users u
+JOIN Responder r ON u.userID = r.userID
+WHERE NOT EXISTS (
+    SELECT s.survivorID
+    FROM SurvivorRecord s
+    WHERE s.isMinor = TRUE
+    AND s.disasterID = 1
+    AND NOT EXISTS (
+        SELECT t.transferID
+        FROM TransferEvent t
+        WHERE t.survivorID = s.survivorID
+        AND t.userID = u.userID
+    )
+);
+
+-- OR : *Disaster Specific* 
+-- finding responders who handeld ALL MINOR SURVIVORS of earthquakes : 
+SELECT u.firstName, u.lastName
+FROM Users u
+JOIN Responder r ON u.userID = r.userID
+WHERE NOT EXISTS (
+    SELECT s.survivorID
+    FROM SurvivorRecord s
+    WHERE s.isMinor = TRUE
+    AND s.disasterID = 2
+    AND NOT EXISTS (
+        SELECT t.transferID
+        FROM TransferEvent t
+        WHERE t.survivorID = s.survivorID
+        AND t.userID = u.userID
+    )
+);
+
+-- OR : *Disaster Specific* 
+-- finding responders who handeld ALL MINOR SURVIVORS of Floods : 
+SELECT u.firstName, u.lastName
+FROM Users u
+JOIN Responder r ON u.userID = r.userID
+WHERE NOT EXISTS (
+    SELECT s.survivorID
+    FROM SurvivorRecord s
+    WHERE s.isMinor = TRUE
+    AND s.disasterID = 3
+    AND NOT EXISTS (
+        SELECT t.transferID
+        FROM TransferEvent t
+        WHERE t.survivorID = s.survivorID
+        AND t.userID = u.userID
+    )
+);
+
+-- OR : *Disaster Specific* 
+-- finding responders who handeld ALL MINOR SURVIVORS of Wildfires : 
+-- Finds responders who handled ALL minor survivors across ALL Wildfire disasters
+SELECT u.firstName, u.lastName
+FROM Users u
+JOIN Responder r ON u.userID = r.userID
+WHERE NOT EXISTS (
+    SELECT s.survivorID
+    FROM SurvivorRecord s
+    JOIN DisasterEvent d ON s.disasterID = d.disasterID
+    WHERE s.isMinor = TRUE
+    AND d.disasterType = 'Wildfire'
+    AND NOT EXISTS (
+        SELECT t.transferID
+        FROM TransferEvent t
+        WHERE t.survivorID = s.survivorID
+        AND t.userID = u.userID
+    )
+);
+
+-- OR : *Disaster Specific* 
+-- finding responders who handeld ALL MINOR SURVIVORS of Tornado : 
+SELECT u.firstName, u.lastName
+FROM Users u
+JOIN Responder r ON u.userID = r.userID
+WHERE NOT EXISTS (
+    -- is there any MINOR survivor from the earthquake...
+    SELECT s.survivorID
+    FROM SurvivorRecord s
+    WHERE s.isMinor = TRUE
+    AND s.disasterID = 5
+    AND NOT EXISTS (
+        -- ...that this responder did NOT handle?
+        SELECT t.transferID
+        FROM TransferEvent t
+        WHERE t.survivorID = s.survivorID
+        AND t.userID = u.userID
+    )
+);
+
+-- Aggregation Query : 
+-- finds number of survivor records for wildfires
+SELECT 
+    d.disasterID,
+    d.location,
+    d.disasterDateTime,
+    COUNT(s.survivorID) AS totalSurvivors
+FROM DisasterEvent d
+LEFT JOIN SurvivorRecord s ON d.disasterID = s.disasterID
+WHERE d.disasterType = 'Wildfire'
+GROUP BY d.disasterID, d.location, d.disasterDateTime
+ORDER BY totalSurvivors DESC;
+
+-- finds number of survivor records for earthquakes 
+SELECT 
+    d.disasterID,
+    d.location,
+    d.disasterDateTime,
+    COUNT(s.survivorID) AS totalSurvivors
+FROM DisasterEvent d
+LEFT JOIN SurvivorRecord s ON d.disasterID = s.disasterID
+WHERE d.disasterType = 'Earthquake'
+GROUP BY d.disasterID, d.location, d.disasterDateTime
+ORDER BY totalSurvivors DESC;
+
+-- finds number of survivor records for Floods
+SELECT 
+    d.disasterID,
+    d.location,
+    d.disasterDateTime,
+    COUNT(s.survivorID) AS totalSurvivors
+FROM DisasterEvent d
+LEFT JOIN SurvivorRecord s ON d.disasterID = s.disasterID
+WHERE d.disasterType = 'Flood'
+GROUP BY d.disasterID, d.location, d.disasterDateTime
+ORDER BY totalSurvivors DESC;
+
+-- finds number of survivor records for Tornados 
+SELECT 
+    d.disasterID,
+    d.location,
+    d.disasterDateTime,
+    COUNT(s.survivorID) AS totalSurvivors
+FROM DisasterEvent d
+LEFT JOIN SurvivorRecord s ON d.disasterID = s.disasterID
+WHERE d.disasterType = 'Tornado'
+GROUP BY d.disasterID, d.location, d.disasterDateTime
+ORDER BY totalSurvivors DESC;
+
