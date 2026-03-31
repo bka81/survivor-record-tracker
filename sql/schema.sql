@@ -1,5 +1,6 @@
-CREATE DATABASE IF NOT EXISTS transfer_db;
-USE transfer_db;
+DROP DATABASE IF EXISTS survivor_record_tracking;
+CREATE DATABASE survivor_record_tracking;
+USE survivor_record_tracking;
 
 CREATE TABLE Users (
     userID INT PRIMARY KEY,
@@ -42,6 +43,14 @@ CREATE TABLE Reviewer (
     CONSTRAINT reviewer_user_fk FOREIGN KEY (userID) REFERENCES Users(userID)
 );
 
+CREATE TABLE DisasterEvent (
+    disasterID INT PRIMARY KEY,
+    disasterType VARCHAR(50) NOT NULL,
+    location VARCHAR(150) NOT NULL,
+    disasterDateTime DATETIME NOT NULL,
+    CONSTRAINT check_disaster_type CHECK (disasterType IN ('Earthquake', 'Flood', 'Wildfire', 'Hurricane', 'Tornado', 'Tsunami', 'Landslide', 'Other'))
+);
+
 CREATE TABLE SurvivorRecord (
     survivorID INT PRIMARY KEY,
     firstName VARCHAR(100),
@@ -49,6 +58,8 @@ CREATE TABLE SurvivorRecord (
     aliasTag VARCHAR(100),
     isMinor BOOLEAN NOT NULL,
     status VARCHAR(50) NOT NULL,
+    disasterID INT NOT NULL,
+    CONSTRAINT survivor_disaster_fk FOREIGN KEY (disasterID) REFERENCES DisasterEvent(disasterID),
     CONSTRAINT check_status CHECK (status IN ('Active', 'Reunited', 'Deceased', 'Unknown', 'Closed'))
 );
 

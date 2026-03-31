@@ -63,14 +63,22 @@ VALUES
 (314),
 (315);
 
-INSERT INTO SurvivorRecord (survivorID, firstName, lastName, aliasTag, isMinor, status)
+INSERT INTO DisasterEvent (disasterID, disasterType, location, disasterDateTime)
 VALUES
-(101, 'Adam', 'Smith', 'Tiger', FALSE, 'Active'),
-(102, 'Bella', 'Jones', 'Eagle', TRUE, 'Active'),
-(103, NULL, NULL, 'Horse', TRUE, 'Unknown'),
-(104, 'Chris', 'Taylor', 'Mouse', FALSE, 'Active'),
-(105, 'Mina', 'Ali', 'Bat', FALSE, 'Reunited'),
-(106, NULL, NULL, 'Rat', TRUE, 'Unknown');
+(1, 'Wildfire', 'North Region, Cascade Mountains', '2026-03-14 14:30:00'),
+(2, 'Earthquake', 'Westside Urban District', '2026-03-14 08:15:00'),
+(3, 'Flood', 'River Valley, South County', '2026-03-13 22:00:00'),
+(4, 'Wildfire', 'East Hills, Pine Forest', '2026-03-15 01:45:00'),
+(5, 'Tornado', 'Central Plains, Springfield', '2026-03-12 16:20:00');
+
+INSERT INTO SurvivorRecord (survivorID, firstName, lastName, aliasTag, isMinor, status, disasterID)
+VALUES
+(101, 'Adam', 'Smith', NULL, FALSE, 'Active', 1),
+(102, 'Bella', 'Jones', NULL, TRUE, 'Active', 4),
+(103, NULL, NULL, 'Unknown1', TRUE, 'Unknown', 3),
+(104, 'Chris', 'Taylor', 'Mouse', FALSE, 'Active', 5),
+(105, 'Mina', 'Ali', 'Bat', FALSE, 'Reunited', 2),
+(106, NULL, NULL, 'Unknown2', TRUE, 'Unknown', 2);
 
 INSERT INTO TransferEvent (transferID, survivorID, toFacilityID, userID, fromFacilityID, transferTime)
 VALUES
@@ -79,7 +87,10 @@ VALUES
 (3, 103, 203, 303, 403, '2026-03-15 11:40:00'),
 (4, 104, 204, 306, 404, '2026-03-15 11:45:00'),
 (5, 105, 205, 307, 405, '2026-03-15 12:00:00'),
-(6, 106, 206, 308, 406, '2026-03-15 12:02:00');
+(6, 106, 206, 308, 406, '2026-03-15 12:02:00'),
+(7, 102, 203, 303, 201, '2026-03-15 14:00:00'),
+(8, 106, 204, 303, 206, '2026-03-15 14:30:00'),
+(9, 106, 203, 303, 204, '2026-03-15 15:00:00');
 
 INSERT INTO TransferNote (transferID, noteNo, noteText)
 VALUES
@@ -97,5 +108,6 @@ VALUES
 (3, 313, 103, 'Resolved', 'Alias tag confirmed by staff', '2026-03-15 13:20:00', 'Verification'),
 (4, 314, 104, 'Open', 'Conflicting transfer note found', '2026-03-15 13:30:00', 'Data Conflict'),
 (5, 315, 105, 'Resolved', 'Reunification status confirmed', '2026-03-15 13:40:00', 'Status Review'),
-(6, 311, 106, 'Open', 'Unknown minor survivor requires identity follow-up', '2026-03-15 13:50:00', 'Missing Information');
-
+(6, 311, 106, 'Open', 'Unknown minor survivor requires identity follow-up', '2026-03-15 13:50:00', 'Missing Information'),
+(7, 312, 101, 'Open', 'Another possible duplicate entry reported by shelter staff', '2026-03-15 14:00:00', 'Duplicate Record'),
+(8, 313, 102, 'Resolved', 'Additional missing ID concern logged during review', '2026-03-15 14:10:00', 'Missing Information');
