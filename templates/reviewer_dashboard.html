@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reviewer Dashboard</title>
+</head>
+<body>
+    <h1>Reviewer Dashboard</h1>
+    <form method="GET" action="/reviewer/dashboard">
+    
+        <label>Disaster Type:
+            <select name="disasterType">
+                <option value="">ALL</option>
+                <option value="Earthquake">Earthquake</option>
+                <option value="Flood">Flood</option>
+                <option value="Tornado">Tornado</option>
+                <option value="Wildfire">Wildfire</option>
+
+            </select>
+        </label>
+        <label>Location:
+            <input type="text" name="location" placeholder="e.g Toronto">
+        </label>
+        <label>Status:
+            <select name="status">
+                <option value="">ALL</option>
+                <option value="Active">Active</option>
+                <option value="Deceased">Deceased</option>
+                <option value="Unknown">Unknown</option>
+                <option value="Reunited">Reunited</option>
+                <option value="Closed">Closed</option>
+            </select>
+            <label>Minor:
+                <input type="checkbox" name="isMinor" value="yes">
+                </select>
+            </label>
+        </label>
+        <button type="submit">Search</button>
+    </form>
+
+    <table border="1">
+        <tr>
+            <th>ID</th>
+            <th>First Name</th>
+            <th>Last Name</th>
+            <th>Alias</th>
+            <th>Minor</th>
+            <th>Status</th>
+            <th>Disaster Type</th>
+            <th>Location</th>
+            <th>Date</th>
+        </tr>
+        {% for s in survivors %}
+        <tr>
+            <td>{{ s.survivorID }}</td>
+            <td>{{ s.firstName }}</td>
+            <td>{{ s.lastName }}</td>
+            <td>{{ s.aliasTag }}</td>
+            <td>{{ "Yes" if s.isMinor else "No" }}</td>
+            <td>{{ s.status }}</td>
+            <td>{{ s.disasterType }}</td>
+            <td>{{ s.location }}</td>
+            <td>{{ s.disasterDateTime }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    
+    {% if survivors|length == 0 %}
+        <p>No records found.</p>
+    {% endif %}
+</body>
+
+</html>
