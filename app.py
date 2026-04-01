@@ -24,29 +24,33 @@ def reviewer_dashboard():
     isMinor = request.args.get("isMinor")
 
     query = """
-    SELECT s.survivorID, s.firstName, s.lastName, s.aliasTag, s.status, d.disasterType, d.location, d.disasterDateTime
+    SELECT s.survivorID, s.firstName, s.lastName, s.aliasTag, s.status, s.isMinor, d.disasterType, d.location, d.disasterDateTime
     FROM SurvivorRecord s
     JOIN DisasterEvent d ON s.disasterID = d.disasterID
     WHERE 1=1
     """
     params = []
     if disaster_type:
-        query += "AND d.disasterType = %s"
+        query += " AND d.disasterType = %s"
         params.append(disaster_type)
     if disaster_location:
-        query += "AND d.location LIKE %s"
+        query += " AND d.location LIKE %s"
         params.append(f"%{disaster_location}%")
     if status:
-        query += "AND s.status = %s"
+        query += " AND s.status = %s"
         params.append(status)
     if isMinor:
-        query += "AND s.isMinor = %s"
-        params.append(1 if isMinor == "yes" else 0)
+        query += " AND s.isMinor = %s"
+        params.append(1)
+
+    print("QUERY:", query)
+    print("PARAMS:", params)
 
     conn = get_db()
     with conn.cursor() as cursor: 
         cursor.execute(query, params)
         results = cursor.fetchall()
+        print("RESULTS:", results)
     conn.close()
 
     return render_template("reviewer_dashboard.html",survivors=results)
