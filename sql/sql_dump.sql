@@ -2,12 +2,14 @@ DROP DATABASE IF EXISTS survivor_record_tracking;
 CREATE DATABASE survivor_record_tracking;
 USE survivor_record_tracking;
 
+
 CREATE TABLE Users (
     userID INT PRIMARY KEY,
     firstName VARCHAR(100) NOT NULL,
     lastName VARCHAR(100) NOT NULL,
     userEmail VARCHAR(100) NOT NULL UNIQUE,
-    userPhoneNo VARCHAR(20) NOT NULL
+    userPhoneNo VARCHAR(20) NOT NULL,
+    userPassword VARCHAR(255) NOT NULL
 );
 
 CREATE TABLE Organization (
@@ -96,7 +98,6 @@ CREATE TABLE Flag (
     CONSTRAINT flag_survivor_fk FOREIGN KEY (survivorID) REFERENCES SurvivorRecord(survivorID),
     CONSTRAINT check_flag_status CHECK (flagStatus IN ('Open', 'Resolved'))
 );
-
 INSERT INTO Organization (orgID, orgType, orgName)
 VALUES
 (1, 'Government', 'Provincial Emergency Services'),
@@ -120,23 +121,23 @@ VALUES
 (405, 'Mobile Aid Unit E', '705 Hill Dr', 2),
 (406, 'Local Intake Center F', '706 Bridge Ave', 4);
 
-INSERT INTO Users (userID, firstName, lastName, userEmail, userPhoneNo)
+INSERT INTO Users (userID, firstName, lastName, userEmail, userPhoneNo, userPassword)
 VALUES
-(301, 'Amina', 'Khan', 'amina.khan@example.com', '604-111-1001'),
-(302, 'Daniel', 'Lee', 'daniel.lee@example.com', '604-111-1002'),
-(303, 'Sara', 'Patel', 'sara.patel@example.com', '604-111-1003'),
-(304, 'Omar', 'Chen', 'omar.chen@example.com', '604-111-1004'),
-(305, 'Lila', 'Brown', 'lila.brown@example.com', '604-111-1005'),
-(306, 'Maya', 'Singh', 'maya.singh@example.com', '604-111-1006'),
-(307, 'Noah', 'Wilson', 'noah.wilson@example.com', '604-111-1007'),
-(308, 'Eva', 'Garcia', 'eva.garcia@example.com', '604-111-1008'),
-(309, 'Ibrahim', 'Ali', 'ibrahim.ali@example.com', '604-111-1009'),
-(310, 'Chloe', 'Martin', 'chloe.martin@example.com', '604-111-1010'),
-(311, 'Zara', 'Ahmed', 'zara.ahmed@example.com', '604-111-1011'),
-(312, 'Ethan', 'Clark', 'ethan.clark@example.com', '604-111-1012'),
-(313, 'Hana', 'Yusuf', 'hana.yusuf@example.com', '604-111-1013'),
-(314, 'Leo', 'Turner', 'leo.turner@example.com', '604-111-1014'),
-(315, 'Nina', 'Scott', 'nina.scott@example.com', '604-111-1015');
+(301, 'Amina', 'Khan', 'amina.khan@example.com', '604-111-1001', 'amina123'),
+(302, 'Daniel', 'Lee', 'daniel.lee@example.com', '604-111-1002', 'daniel123'),
+(303, 'Sara', 'Patel', 'sara.patel@example.com', '604-111-1003', 'sara123'),
+(304, 'Omar', 'Chen', 'omar.chen@example.com', '604-111-1004', 'omar123'),
+(305, 'Lila', 'Brown', 'lila.brown@example.com', '604-111-1005', 'lila123'),
+(306, 'Maya', 'Singh', 'maya.singh@example.com', '604-111-1006', 'maya123'),
+(307, 'Noah', 'Wilson', 'noah.wilson@example.com', '604-111-1007', 'noah123'),
+(308, 'Eva', 'Garcia', 'eva.garcia@example.com', '604-111-1008', 'eva123'),
+(309, 'Ibrahim', 'Ali', 'ibrahim.ali@example.com', '604-111-1009', 'ibrahim123'),
+(310, 'Chloe', 'Martin', 'chloe.martin@example.com', '604-111-1010', 'chloe123'),
+(311, 'Zara', 'Ahmed', 'zara.ahmed@example.com', '604-111-1011', 'zara123'),
+(312, 'Ethan', 'Clark', 'ethan.clark@example.com', '604-111-1012', 'ethan123'),
+(313, 'Hana', 'Yusuf', 'hana.yusuf@example.com', '604-111-1013', 'hana123'),
+(314, 'Leo', 'Turner', 'leo.turner@example.com', '604-111-1014', 'leo123'),
+(315, 'Nina', 'Scott', 'nina.scott@example.com', '604-111-1015', 'nina123');
 
 INSERT INTO Responder (userID, orgID)
 VALUES
@@ -175,9 +176,33 @@ VALUES
 (101, 'Adam', 'Smith', NULL, FALSE, 'Active', 1),
 (102, 'Bella', 'Jones', NULL, TRUE, 'Active', 4),
 (103, NULL, NULL, 'Unknown1', TRUE, 'Unknown', 3),
-(104, 'Chris', 'Taylor', 'Mouse', FALSE, 'Active', 5),
-(105, 'Mina', 'Ali', 'Bat', FALSE, 'Reunited', 2),
-(106, NULL, NULL, 'Unknown2', TRUE, 'Unknown', 2);
+(104, 'Chris', 'Taylor', NULL, FALSE, 'Active', 5),
+(105, 'Mina', 'Ali', NULL, FALSE, 'Reunited', 2),
+(106, NULL, NULL, 'Unknown2', TRUE, 'Unknown', 2),
+
+(107, 'Nora', 'Evans', NULL, FALSE, 'Active', 1),
+(108, 'Isaac', 'Moore', NULL, TRUE, 'Active', 1),
+(109, NULL, NULL, 'Unknown3', FALSE, 'Unknown', 1),
+(110, 'Jamal', 'Reed', NULL, FALSE, 'Active', 1),
+
+(111, 'Layla', 'Hassan', NULL, TRUE, 'Active', 2),
+(112, 'Owen', 'Brooks', NULL, FALSE, 'Active', 2),
+(113, NULL, NULL, 'Unknown4', TRUE, 'Unknown', 2),
+
+(114, 'Emily', 'Ward', NULL, FALSE, 'Active', 3),
+(115, 'Rayan', 'Nasir', NULL, TRUE, 'Active', 3),
+(116, NULL, NULL, 'Unknown5', FALSE, 'Unknown', 3),
+(117, 'Sophia', 'Cole', NULL, FALSE, 'Reunited', 3),
+
+(118, 'Lucas', 'Price', NULL, FALSE, 'Active', 4),
+(119, 'Ava', 'Mitchell', NULL, TRUE, 'Active', 4),
+(120, NULL, NULL, 'Unknown6', FALSE, 'Unknown', 4),
+(121, 'Yusuf', 'Rahman', NULL, FALSE, 'Active', 4),
+
+(122, 'Mason', 'Perry', NULL, FALSE, 'Active', 5),
+(123, 'Ella', 'Long', NULL, TRUE, 'Active', 5),
+(124, NULL, NULL, 'Unknown7', FALSE, 'Unknown', 5),
+(125, 'Hiba', 'Karim', NULL, FALSE, 'Active', 5);
 
 INSERT INTO TransferEvent (transferID, survivorID, toFacilityID, userID, fromFacilityID, transferTime)
 VALUES
@@ -189,7 +214,39 @@ VALUES
 (6, 106, 206, 308, 406, '2026-03-15 12:02:00'),
 (7, 102, 203, 303, 201, '2026-03-15 14:00:00'),
 (8, 106, 204, 303, 206, '2026-03-15 14:30:00'),
-(9, 106, 203, 303, 204, '2026-03-15 15:00:00');
+(9, 106, 203, 303, 204, '2026-03-15 15:00:00'),
+
+(10, 101, 206, 306, 201, '2026-03-15 13:20:00'),
+(11, 105, 206, 307, 205, '2026-03-15 13:35:00'),
+
+(12, 107, 201, 301, 401, '2026-03-15 10:20:00'),
+(13, 107, 206, 306, 201, '2026-03-15 16:10:00'),
+(14, 108, 204, 302, 405, '2026-03-15 10:40:00'),
+(15, 109, 205, 304, 403, '2026-03-15 11:05:00'),
+(16, 110, 202, 305, 402, '2026-03-15 11:25:00'),
+
+(17, 111, 202, 302, 402, '2026-03-15 10:50:00'),
+(18, 111, 203, 308, 202, '2026-03-15 15:20:00'),
+(19, 112, 205, 304, 406, '2026-03-15 11:10:00'),
+(20, 113, 201, 301, 401, '2026-03-15 11:50:00'),
+
+(21, 114, 204, 305, 405, '2026-03-15 10:35:00'),
+(22, 114, 206, 307, 204, '2026-03-15 16:00:00'),
+(23, 115, 203, 303, 403, '2026-03-15 11:15:00'),
+(24, 116, 201, 301, 406, '2026-03-15 11:55:00'),
+(25, 117, 206, 307, 202, '2026-03-15 12:15:00'),
+
+(26, 118, 202, 302, 402, '2026-03-15 10:45:00'),
+(27, 118, 203, 308, 202, '2026-03-15 15:45:00'),
+(28, 119, 201, 301, 401, '2026-03-15 11:35:00'),
+(29, 120, 204, 305, 404, '2026-03-15 12:05:00'),
+(30, 121, 205, 304, 405, '2026-03-15 12:25:00'),
+
+(31, 122, 204, 305, 404, '2026-03-15 10:55:00'),
+(32, 122, 203, 308, 204, '2026-03-15 16:20:00'),
+(33, 123, 202, 302, 402, '2026-03-15 11:45:00'),
+(34, 124, 205, 304, 405, '2026-03-15 12:10:00'),
+(35, 125, 206, 307, 406, '2026-03-15 12:35:00');
 
 INSERT INTO TransferNote (transferID, noteNo, noteText)
 VALUES
@@ -198,7 +255,42 @@ VALUES
 (3, 1, 'Minor survivor; family not yet located'),
 (4, 1, 'Survivor reported leg injury'),
 (5, 1, 'Transfer completed without incident'),
-(6, 1, 'Survivor arrived with temporary identification tag');
+(6, 1, 'Survivor arrived with temporary identification tag'),
+(7, 1, 'Survivor reassigned to hospital for further assessment'),
+(8, 1, 'Survivor moved from reunification center to shelter for temporary placement'),
+(9, 1, 'Survivor transferred again for medical follow-up and identification support'),
+
+(10, 1, 'Survivor moved from shelter to reunification center for family contact'),
+(11, 1, 'Reunited survivor transferred to family reunification center for discharge coordination'),
+
+(12, 1, 'Survivor admitted to North Emergency Shelter'),
+(13, 1, 'Survivor later moved to reunification center for family contact'),
+(14, 1, 'Minor survivor placed in relief shelter with supervision'),
+(15, 1, 'Unidentified survivor taken to medical triage center'),
+(16, 1, 'Survivor checked into East Community Shelter'),
+
+(17, 1, 'Minor survivor received intake support at shelter'),
+(18, 1, 'Survivor later sent to hospital for follow-up examination'),
+(19, 1, 'Survivor routed to triage center after initial field assessment'),
+(20, 1, 'Unknown minor survivor transferred to emergency shelter'),
+
+(21, 1, 'Flood survivor placed in relief shelter'),
+(22, 1, 'Survivor later transferred to reunification center'),
+(23, 1, 'Minor survivor taken to hospital for observation'),
+(24, 1, 'Unidentified survivor admitted to emergency shelter'),
+(25, 1, 'Reunited survivor processed through reunification center'),
+
+(26, 1, 'Wildfire survivor admitted to East Community Shelter'),
+(27, 1, 'Survivor later moved to hospital for respiratory concerns'),
+(28, 1, 'Minor survivor transferred to North Emergency Shelter'),
+(29, 1, 'Unidentified survivor placed in West Relief Shelter'),
+(30, 1, 'Survivor admitted to South Medical Triage Center'),
+
+(31, 1, 'Tornado survivor placed in West Relief Shelter'),
+(32, 1, 'Survivor later transferred to hospital for additional treatment'),
+(33, 1, 'Minor survivor admitted to East Community Shelter'),
+(34, 1, 'Unidentified survivor transferred to triage center'),
+(35, 1, 'Survivor routed to reunification center for case follow-up');
 
 INSERT INTO Flag (flagID, userID, survivorID, flagStatus, description, createdAt, category)
 VALUES
@@ -208,8 +300,8 @@ VALUES
 (4, 314, 104, 'Open', 'Conflicting transfer note found', '2026-03-15 13:30:00', 'Data Conflict'),
 (5, 315, 105, 'Resolved', 'Reunification status confirmed', '2026-03-15 13:40:00', 'Status Review'),
 (6, 311, 106, 'Open', 'Unknown minor survivor requires identity follow-up', '2026-03-15 13:50:00', 'Missing Information'),
-(7, 312, 101, 'Open', 'Another possible duplicate entry reported by shelter staff', '2026-03-15 14:00:00', 'Duplicate Record'),
-(8, 313, 102, 'Resolved', 'Additional missing ID concern logged during review', '2026-03-15 14:10:00', 'Missing Information');
+(7, 312, 109, 'Open', 'Unidentified survivor may match another intake record', '2026-03-15 14:00:00', 'Duplicate Record'),
+(8, 313, 116, 'Resolved', 'Temporary alias reviewed and record verified', '2026-03-15 14:10:00', 'Verification');
 
 -- selecting survivors who have been flagged more than once
 SELECT survivorID, firstName, lastName
@@ -419,3 +511,42 @@ WHERE d.disasterType = 'Tornado'
 GROUP BY d.disasterID, d.location, d.disasterDateTime
 ORDER BY totalSurvivors DESC;
 
+-- example login query:
+-- This query checks whether a user exists with the entered email and password.
+-- It also determines the user's role by checking which subtype table
+-- (Responder, FacilityStaff, or Reviewer) contains that userID.
+-- For this demo, passwords are stored as plain text for simplicity.
+-- In a future version, this can be improved by storing hashed passwords instead of plain text
+-- and verifying them in the backend using a library such as bcrypt.
+
+SELECT 
+    u.userID,
+    u.firstName,
+    u.lastName,
+    u.userEmail,
+    CASE
+        WHEN r.userID IS NOT NULL THEN 'Responder'
+        WHEN fs.userID IS NOT NULL THEN 'FacilityStaff'
+        WHEN rv.userID IS NOT NULL THEN 'Reviewer'
+    END AS userRole
+FROM Users u
+LEFT JOIN Responder r ON u.userID = r.userID
+LEFT JOIN FacilityStaff fs ON u.userID = fs.userID
+LEFT JOIN Reviewer rv ON u.userID = rv.userID
+WHERE u.userEmail = ?
+  AND u.userPassword = ?;
+
+-- same query but different implementation: 
+SELECT 
+    u.userID,
+    u.firstName,
+    u.lastName,
+    u.userEmail,
+    CASE
+        WHEN EXISTS (SELECT 1 FROM Responder r WHERE r.userID = u.userID) THEN 'Responder'
+        WHEN EXISTS (SELECT 1 FROM FacilityStaff fs WHERE fs.userID = u.userID) THEN 'FacilityStaff'
+        WHEN EXISTS (SELECT 1 FROM Reviewer rv WHERE rv.userID = u.userID) THEN 'Reviewer'
+    END AS userRole
+FROM Users u
+WHERE u.userEmail = ?
+  AND u.userPassword = ?;

@@ -10,7 +10,14 @@
     --default-mono-font-family: var(--font-mono);
     --color-bg-950: #0a0c0f;
     --color-bg-900: #14171c;
+    --color-surface: #1a1d24;
+    --color-matrix: #00ff41;
+    --color-cyber: #00d4ff;
     --color-text: #e0e0e0;
+    --color-muted: #8b93a7;
+    --color-border: #2a2e3a;
+    --color-danger: #ff3366;
+    --color-warning: #ffb347;
   }
 }
 @layer base {
@@ -168,6 +175,13 @@
   .block {
     display: block;
   }
+  .table {
+    display: table;
+  }
+  .border {
+    border-style: var(--tw-border-style);
+    border-width: 1px;
+  }
 }
 @layer base {
   html {
@@ -186,6 +200,11 @@
     text-transform: uppercase;
   }
 }
+@property --tw-border-style {
+  syntax: "*";
+  inherits: false;
+  initial-value: solid;
+}
 @property --tw-tracking {
   syntax: "*";
   inherits: false;
@@ -193,6 +212,7 @@
 @layer properties {
   @supports ((-webkit-hyphens: none) and (not (margin-trim: inline))) or ((-moz-orient: inline) and (not (color:rgb(from red r g b)))) {
     *, ::before, ::after, ::backdrop {
+      --tw-border-style: solid;
       --tw-tracking: initial;
     }
   }
