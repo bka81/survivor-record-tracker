@@ -205,3 +205,43 @@ LEFT JOIN SurvivorRecord s ON d.disasterID = s.disasterID
 WHERE d.disasterType = 'Tornado'
 GROUP BY d.disasterID, d.location, d.disasterDateTime
 ORDER BY totalSurvivors DESC;
+
+-- example login query:
+-- This query checks whether a user exists with the entered email and password.
+-- It also determines the user's role by checking which subtype table
+-- (Responder, FacilityStaff, or Reviewer) contains that userID.
+-- For this demo, passwords are stored as plain text for simplicity.
+-- In a future version, this can be improved by storing hashed passwords instead of plain text
+-- and verifying them in the backend using a library such as bcrypt.
+
+SELECT 
+    u.userID,
+    u.firstName,
+    u.lastName,
+    u.userEmail,
+    CASE
+        WHEN r.userID IS NOT NULL THEN 'Responder'
+        WHEN fs.userID IS NOT NULL THEN 'FacilityStaff'
+        WHEN rv.userID IS NOT NULL THEN 'Reviewer'
+    END AS userRole
+FROM Users u
+LEFT JOIN Responder r ON u.userID = r.userID
+LEFT JOIN FacilityStaff fs ON u.userID = fs.userID
+LEFT JOIN Reviewer rv ON u.userID = rv.userID
+WHERE u.userEmail = ?
+  AND u.userPassword = ?;
+
+-- same query but different implementation: 
+SELECT 
+    u.userID,
+    u.firstName,
+    u.lastName,
+    u.userEmail,
+    CASE
+        WHEN EXISTS (SELECT 1 FROM Responder r WHERE r.userID = u.userID) THEN 'Responder'
+        WHEN EXISTS (SELECT 1 FROM FacilityStaff fs WHERE fs.userID = u.userID) THEN 'FacilityStaff'
+        WHEN EXISTS (SELECT 1 FROM Reviewer rv WHERE rv.userID = u.userID) THEN 'Reviewer'
+    END AS userRole
+FROM Users u
+WHERE u.userEmail = ?
+  AND u.userPassword = ?;
