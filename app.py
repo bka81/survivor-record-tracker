@@ -50,10 +50,28 @@ def reviewer_dashboard():
     with conn.cursor() as cursor: 
         cursor.execute(query, params)
         results = cursor.fetchall()
-        print("RESULTS:", results)
+
+        cursor.execute("SELECT COUNT(*) AS total FROM SurvivorRecord")
+        total_survivors = cursor.fetchone()['total']
+        
+        cursor.execute("SELECT COUNT(*) AS total FROM Facility")
+        total_facilities = cursor.fetchone()['total']
+        
+        cursor.execute("SELECT COUNT(*) AS total FROM Flag WHERE FlagStatus='Open'")
+        total_flags = cursor.fetchone()['total']
+
+        cursor.execute("SELECT COUNT(*) AS total FROM DisasterEvent")
+        total_disasters = cursor.fetchone()['total']
+
+
     conn.close()
 
-    return render_template("reviewer_dashboard.html",survivors=results)
+    return render_template("reviewer_dashboard.html",
+    survivors=results, 
+    total_disasters=total_disasters,
+    total_facilities=total_facilities,
+    total_flags=total_flags,
+    total_survivors=total_survivors)
 
 @app.route("/staff/dashboard")
 def staff_dashboard():

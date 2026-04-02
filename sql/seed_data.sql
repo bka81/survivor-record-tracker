@@ -1,4 +1,4 @@
-INSERT INTO Organization (orgID, orgType, orgName)
+INSERT IGNORE INTO Organization (orgID, orgType, orgName)
 VALUES
 (1, 'Government', 'Provincial Emergency Services'),
 (2, 'NGO', 'Red Cross Relief Team'),
@@ -6,22 +6,7 @@ VALUES
 (4, 'Shelter', 'Community Shelter Network'),
 (5, 'Government', 'Municipal Fire Rescue');
 
-INSERT INTO Facility (facilityID, facilityName, address, orgID)
-VALUES
-(201, 'North Emergency Shelter', '101 Main St', 4),
-(202, 'East Community Shelter', '202 Oak Ave', 4),
-(203, 'City General Hospital', '303 Health Rd', 3),
-(204, 'West Relief Shelter', '404 Pine St', 2),
-(205, 'South Medical Triage Center', '505 River Dr', 1),
-(206, 'Central Family Reunification Center', '606 Hope Blvd', 1),
-(401, 'Rescue Staging Area A', '701 Front St', 5),
-(402, 'Temporary Shelter B', '702 Lake Ave', 2),
-(403, 'Field Medical Camp C', '703 Valley Rd', 1),
-(404, 'Transit Point D', '704 Cedar St', 5),
-(405, 'Mobile Aid Unit E', '705 Hill Dr', 2),
-(406, 'Local Intake Center F', '706 Bridge Ave', 4);
-
-INSERT INTO Users (userID, firstName, lastName, userEmail, userPhoneNo)
+INSERT IGNORE INTO Users (userID, firstName, lastName, userEmail, userPhoneNo)
 VALUES
 (301, 'Amina', 'Khan', 'amina.khan@example.com', '604-111-1001'),
 (302, 'Daniel', 'Lee', 'daniel.lee@example.com', '604-111-1002'),
@@ -39,7 +24,23 @@ VALUES
 (314, 'Leo', 'Turner', 'leo.turner@example.com', '604-111-1014'),
 (315, 'Nina', 'Scott', 'nina.scott@example.com', '604-111-1015');
 
-INSERT INTO Responder (userID, orgID)
+INSERT IGNORE INTO Facility (facilityID, facilityName, address, orgID)
+VALUES
+(201, 'North Emergency Shelter', '101 Main St', 4),
+(202, 'East Community Shelter', '202 Oak Ave', 4),
+(203, 'City General Hospital', '303 Health Rd', 3),
+(204, 'West Relief Shelter', '404 Pine St', 2),
+(205, 'South Medical Triage Center', '505 River Dr', 1),
+(206, 'Central Family Reunification Center', '606 Hope Blvd', 1),
+(401, 'Rescue Staging Area A', '701 Front St', 5),
+(402, 'Temporary Shelter B', '702 Lake Ave', 2),
+(403, 'Field Medical Camp C', '703 Valley Rd', 1),
+(404, 'Transit Point D', '704 Cedar St', 5),
+(405, 'Mobile Aid Unit E', '705 Hill Dr', 2),
+(406, 'Local Intake Center F', '706 Bridge Ave', 4);
+
+
+INSERT IGNORE INTO Responder (userID, orgID)
 VALUES
 (301, 1),
 (302, 2),
@@ -47,7 +48,7 @@ VALUES
 (304, 1),
 (305, 2);
 
-INSERT INTO FacilityStaff (userID, facilityID)
+INSERT IGNORE INTO FacilityStaff (userID, facilityID)
 VALUES
 (306, 201),
 (307, 202),
@@ -55,7 +56,7 @@ VALUES
 (309, 204),
 (310, 205);
 
-INSERT INTO Reviewer (userID)
+INSERT IGNORE INTO Reviewer (userID)
 VALUES
 (311),
 (312),
@@ -63,7 +64,7 @@ VALUES
 (314),
 (315);
 
-INSERT INTO DisasterEvent (disasterID, disasterType, location, disasterDateTime)
+INSERT IGNORE INTO DisasterEvent (disasterID, disasterType, location, disasterDateTime)
 VALUES
 (1, 'Wildfire', 'North Region, Cascade Mountains', '2026-03-14 14:30:00'),
 (2, 'Earthquake', 'Westside Urban District', '2026-03-14 08:15:00'),
@@ -71,7 +72,7 @@ VALUES
 (4, 'Wildfire', 'East Hills, Pine Forest', '2026-03-15 01:45:00'),
 (5, 'Tornado', 'Central Plains, Springfield', '2026-03-12 16:20:00');
 
-INSERT INTO SurvivorRecord (survivorID, firstName, lastName, aliasTag, isMinor, status, disasterID)
+INSERT IGNORE INTO SurvivorRecord (survivorID, firstName, lastName, aliasTag, isMinor, status, disasterID)
 VALUES
 (101, 'Adam', 'Smith', NULL, FALSE, 'Active', 1),
 (102, 'Bella', 'Jones', NULL, TRUE, 'Active', 4),
@@ -80,7 +81,7 @@ VALUES
 (105, 'Mina', 'Ali', 'Bat', FALSE, 'Reunited', 2),
 (106, NULL, NULL, 'Unknown2', TRUE, 'Unknown', 2);
 
-INSERT INTO TransferEvent (transferID, survivorID, toFacilityID, userID, fromFacilityID, transferTime)
+INSERT IGNORE INTO TransferEvent (transferID, survivorID, toFacilityID, userID, fromFacilityID, transferTime)
 VALUES
 (1, 101, 201, 301, 401, '2026-03-15 10:00:00'),
 (2, 102, 202, 302, 402, '2026-03-15 11:30:00'),
@@ -92,7 +93,7 @@ VALUES
 (8, 106, 204, 303, 206, '2026-03-15 14:30:00'),
 (9, 106, 203, 303, 204, '2026-03-15 15:00:00');
 
-INSERT INTO TransferNote (transferID, noteNo, noteText)
+INSERT IGNORE INTO TransferNote (transferID, noteNo, noteText)
 VALUES
 (1, 1, 'Survivor moved safely'),
 (2, 1, 'No issues during transfer'),
@@ -101,7 +102,7 @@ VALUES
 (5, 1, 'Transfer completed without incident'),
 (6, 1, 'Survivor arrived with temporary identification tag');
 
-INSERT INTO Flag (flagID, userID, survivorID, flagStatus, description, createdAt, category)
+INSERT IGNORE INTO Flag (flagID, userID, survivorID, flagStatus, description, createdAt, category)
 VALUES
 (1, 311, 101, 'Open', 'Possible duplicate survivor record', '2026-03-15 13:00:00', 'Duplicate Record'),
 (2, 312, 102, 'Open', 'Missing identification details', '2026-03-15 13:10:00', 'Missing Information'),

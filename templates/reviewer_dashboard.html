@@ -20,28 +20,28 @@
                 <span class="stat-label">Total Survivors</span>
                 <span class="stat-icon">👤</span>
             </div>
-            <div class="stat-value">{{ survivors|length if survivors else 0 }}</div>
+            <div class="stat-value">{{ total_survivors }}</div>
         </div>
         <div class="stat-card cyan">
             <div class="stat-header">
                 <span class="stat-label">Active Facilities</span>
                 <span class="stat-icon">🏢</span>
             </div>
-            <div class="stat-value">—</div>
+            <div class="stat-value">{{ total_facilities }}</div>
         </div>
         <div class="stat-card orange">
             <div class="stat-header">
                 <span class="stat-label">Flagged Cases</span>
                 <span class="stat-icon">🚩</span>
             </div>
-            <div class="stat-value">—</div>
+            <div class="stat-value">{{ total_flags }}</div>
         </div>
         <div class="stat-card red">
             <div class="stat-header">
                 <span class="stat-label">Active Disasters</span>
                 <span class="stat-icon">⚠️</span>
             </div>
-            <div class="stat-value">—</div>
+            <div class="stat-value">{{ total_disasters }}</div>
         </div>
     </div>
     <div class="main-layout">
@@ -64,7 +64,7 @@
             <input type="text" name="location" placeholder="e.g Toronto">
         </label>
         <label class="filter-label">Status:
-            <select name="status">
+            <select name="status" class="filter-select">
                 <option value="">ALL</option>
                 <option value="Active">Active</option>
                 <option value="Deceased">Deceased</option>
@@ -82,7 +82,10 @@
     </div>
     </div>
 
-    <table border="1">
+    {% if survivors is not defined or survivors|length == 0 %}
+    <div class="no-results"></div>
+    {% else %}   
+    <table class="results-table">
         <tr>
             <th>ID</th>
             <th>First Name</th>
@@ -109,8 +112,6 @@
         {% endfor %}
     </table>
     
-    {% if survivors|length == 0 %}
-        <p>No records found.</p>
     {% endif %}
 </body>
 

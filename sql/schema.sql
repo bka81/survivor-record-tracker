@@ -1,7 +1,5 @@
-DROP DATABASE IF EXISTS survivor_record_tracking;
-CREATE DATABASE survivor_record_tracking;
+CREATE DATABASE IF NOT EXISTS survivor_record_tracking;
 USE survivor_record_tracking;
-
 
 CREATE TABLE Users (
     userID INT PRIMARY KEY,
