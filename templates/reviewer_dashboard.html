@@ -5,25 +5,65 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Reviewer Dashboard</title>
-</head>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/output.css') }}"></head>
 <body>
-    <h1>Reviewer Dashboard</h1>
-    <form method="GET" action="/reviewer/dashboard">
-    
-        <label>Disaster Type:
+    <div class="header">
+        <div class="header-title">
+            <h1>Command Center</h1>
+            <p>User: <span>reviewer</span> | Role: <span>REVIEWER</span></p>
+        </div>
+        <a href="/login" class="logout-btn">⇥ Logout</a>
+    </div>
+    <div class="stats-grid">
+        <div class="stat-card green">
+            <div class="stat-header">
+                <span class="stat-label">Total Survivors</span>
+                <span class="stat-icon">👤</span>
+            </div>
+            <div class="stat-value">{{ survivors|length if survivors else 0 }}</div>
+        </div>
+        <div class="stat-card cyan">
+            <div class="stat-header">
+                <span class="stat-label">Active Facilities</span>
+                <span class="stat-icon">🏢</span>
+            </div>
+            <div class="stat-value">—</div>
+        </div>
+        <div class="stat-card orange">
+            <div class="stat-header">
+                <span class="stat-label">Flagged Cases</span>
+                <span class="stat-icon">🚩</span>
+            </div>
+            <div class="stat-value">—</div>
+        </div>
+        <div class="stat-card red">
+            <div class="stat-header">
+                <span class="stat-label">Active Disasters</span>
+                <span class="stat-icon">⚠️</span>
+            </div>
+            <div class="stat-value">—</div>
+        </div>
+    </div>
+    <div class="main-layout">
+        <div class="search-panel">
+            <div class="section-title">⌕ Search Records</div>
+            <form method="GET" action="/reviewer/dashboard" class="filter-form">
+
+    <div>
+        <label class="filter-label">Disaster Type:
             <select name="disasterType">
                 <option value="">ALL</option>
                 <option value="Earthquake">Earthquake</option>
                 <option value="Flood">Flood</option>
                 <option value="Tornado">Tornado</option>
                 <option value="Wildfire">Wildfire</option>
-
+    </div>
             </select>
         </label>
-        <label>Location:
+        <label class="filter-label">Location:
             <input type="text" name="location" placeholder="e.g Toronto">
         </label>
-        <label>Status:
+        <label class="filter-label">Status:
             <select name="status">
                 <option value="">ALL</option>
                 <option value="Active">Active</option>
@@ -32,13 +72,15 @@
                 <option value="Reunited">Reunited</option>
                 <option value="Closed">Closed</option>
             </select>
-            <label>Minor:
+            <label class="checkbox-row">Minor:
                 <input type="checkbox" name="isMinor" value="yes">
                 </select>
             </label>
         </label>
-        <button type="submit">Search</button>
+        <button type="submit" class="search-btn">Search</button>
     </form>
+    </div>
+    </div>
 
     <table border="1">
         <tr>
