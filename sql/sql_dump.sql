@@ -54,7 +54,7 @@ CREATE TABLE DisasterEvent (
 );
 
 CREATE TABLE SurvivorRecord (
-    survivorID INT PRIMARY KEY,
+    survivorID INT AUTO_INCREMENT PRIMARY KEY,
     firstName VARCHAR(100),
     lastName VARCHAR(100),
     aliasTag VARCHAR(100),
@@ -66,7 +66,7 @@ CREATE TABLE SurvivorRecord (
 );
 
 CREATE TABLE TransferEvent (
-    transferID INT PRIMARY KEY,
+    transferID INT AUTO_INCREMENT PRIMARY KEY,
     survivorID INT NOT NULL,
     fromFacilityID INT,
     toFacilityID INT NOT NULL,
@@ -87,7 +87,7 @@ CREATE TABLE TransferNote (
 );
 
 CREATE TABLE Flag (
-    flagID INT PRIMARY KEY,
+    flagID INT AUTO_INCREMENT PRIMARY KEY,
     userID INT NOT NULL,
     survivorID INT NOT NULL,
     flagStatus VARCHAR(50) NOT NULL,
@@ -511,6 +511,7 @@ WHERE d.disasterType = 'Tornado'
 GROUP BY d.disasterID, d.location, d.disasterDateTime
 ORDER BY totalSurvivors DESC;
 
+/*
 -- example login query:
 -- This query checks whether a user exists with the entered email and password.
 -- It also determines the user's role by checking which subtype table
@@ -537,6 +538,7 @@ WHERE u.userEmail = ?
   AND u.userPassword = ?;
 
 -- same query but different implementation: 
+
 SELECT 
     u.userID,
     u.firstName,
@@ -550,3 +552,4 @@ SELECT
 FROM Users u
 WHERE u.userEmail = ?
   AND u.userPassword = ?;
+*/
