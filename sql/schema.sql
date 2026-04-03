@@ -83,7 +83,8 @@ CREATE TABLE TransferNote (
     noteNo INT NOT NULL,
     noteText TEXT,
     PRIMARY KEY (transferID, noteNo),
-    CONSTRAINT transferNote_transfer_fk FOREIGN KEY (transferID) REFERENCES TransferEvent(transferID)
+    CONSTRAINT transferNote_transfer_fk 
+        FOREIGN KEY (transferID) REFERENCES TransferEvent(transferID) ON DELETE CASCADE
 );
 
 CREATE TABLE Flag (

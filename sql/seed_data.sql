@@ -6,22 +6,6 @@ VALUES
 (4, 'Shelter', 'Community Shelter Network'),
 (5, 'Government', 'Municipal Fire Rescue');
 
-INSERT IGNORE INTO Users (userID, firstName, lastName, userEmail, userPhoneNo)
-=======
-INSERT INTO Facility (facilityID, facilityName, address, orgID)
-VALUES
-(201, 'North Emergency Shelter', '101 Main St', 4),
-(202, 'East Community Shelter', '202 Oak Ave', 4),
-(203, 'City General Hospital', '303 Health Rd', 3),
-(204, 'West Relief Shelter', '404 Pine St', 2),
-(205, 'South Medical Triage Center', '505 River Dr', 1),
-(206, 'Central Family Reunification Center', '606 Hope Blvd', 1),
-(401, 'Rescue Staging Area A', '701 Front St', 5),
-(402, 'Temporary Shelter B', '702 Lake Ave', 2),
-(403, 'Field Medical Camp C', '703 Valley Rd', 1),
-(404, 'Transit Point D', '704 Cedar St', 5),
-(405, 'Mobile Aid Unit E', '705 Hill Dr', 2),
-(406, 'Local Intake Center F', '706 Bridge Ave', 4);
 
 INSERT IGNORE INTO Users (userID, firstName, lastName, userEmail, userPhoneNo, userPassword)
 VALUES

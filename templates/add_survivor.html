@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Survivor Record</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/output.css') }}">
+</head>
+<body class="min-h-screen font-sans" style="color: var(--color-text); background: linear-gradient(180deg, var(--color-bg-950), var(--color-bg-900));">
+
+    <div class="flex justify-between items-center p-6 border-b border-[var(--color-border)]">
+        <div>
+            <h1 class="font-mono uppercase tracking-widest text-2xl font-bold">Create Survivor Record</h1>
+            <p class="text-[var(--color-muted)] mt-1">Responder / Facility Staff Intake Form</p>
+        </div>
+        <a href="{{ url_for('staff_dashboard') }}" class="px-4 py-2 bg-[var(--color-cyber)] text-black rounded-lg hover:brightness-110 transition-all inline-block">
+            ← Back to Dashboard
+        </a>
+    </div>
+
+    <div class="p-6">
+        <div class="max-w-3xl mx-auto bg-[var(--color-surface)] rounded-lg p-6 shadow-lg">
+            <h2 class="font-mono uppercase tracking-widest text-xl font-bold mb-6 text-[var(--color-matrix)]">New Survivor Intake</h2>
+
+            <form method="POST" action="{{ url_for('add_survivor') }}" class="space-y-5">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-[var(--color-muted)] mb-2">First Name:</label>
+                        <input type="text" name="firstName"
+                               class="w-full px-3 py-2 bg-[var(--color-bg-900)] border border-[var(--color-border)] rounded-lg focus:outline-none focus:border-[var(--color-cyber)]">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-[var(--color-muted)] mb-2">Last Name:</label>
+                        <input type="text" name="lastName"
+                               class="w-full px-3 py-2 bg-[var(--color-bg-900)] border border-[var(--color-border)] rounded-lg focus:outline-none focus:border-[var(--color-cyber)]">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-[var(--color-muted)] mb-2">Alias Tag:</label>
+                    <input type="text" name="aliasTag"
+                           class="w-full px-3 py-2 bg-[var(--color-bg-900)] border border-[var(--color-border)] rounded-lg focus:outline-none focus:border-[var(--color-cyber)]">
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-[var(--color-muted)] mb-2">Is Minor:</label>
+                        <select name="isMinor" required
+                                class="w-full px-3 py-2 bg-[var(--color-bg-900)] border border-[var(--color-border)] rounded-lg focus:outline-none focus:border-[var(--color-cyber)]">
+                            <option value="1">Yes</option>
+                            <option value="0">No</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-[var(--color-muted)] mb-2">Status:</label>
+                        <select name="status" required
+                                class="w-full px-3 py-2 bg-[var(--color-bg-900)] border border-[var(--color-border)] rounded-lg focus:outline-none focus:border-[var(--color-cyber)]">
+                            <option value="Active">Active</option>
+                            <option value="Reunited">Reunited</option>
+                            <option value="Deceased">Deceased</option>
+                            <option value="Unknown">Unknown</option>
+                            <option value="Closed">Closed</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-[var(--color-muted)] mb-2">Disaster:</label>
+                    <select name="disasterID" required
+                            class="w-full px-3 py-2 bg-[var(--color-bg-900)] border border-[var(--color-border)] rounded-lg focus:outline-none focus:border-[var(--color-cyber)]">
+                        {% for disaster in disasters %}
+                        <option value="{{ disaster.disasterID }}">
+                            {{ disaster.disasterType }} - {{ disaster.location }} - {{ disaster.disasterDateTime }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="pt-2">
+                    <button type="submit" class="px-6 py-2 bg-[var(--color-success)] text-black font-semibold rounded-lg hover:brightness-110 transition-all">
+                        Create Survivor Record
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

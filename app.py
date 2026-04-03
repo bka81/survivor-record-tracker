@@ -75,15 +75,178 @@ def reviewer_dashboard():
 
 @app.route("/staff/dashboard")
 def staff_dashboard():
-    return render_template("staff_dashboard.html")
+    survivor_name = request.args.get("name", "").strip()
+    survivor_alias = request.args.get("aliasTag", "").strip()
+    disaster_id = request.args.get("disasterID", "").strip()
 
-@app.route("/staff/add-survivor")
+    conn = get_db()
+    with conn.cursor() as cursor:
+        search_query = """
+            SELECT 
+                s.survivorID,
+                s.firstName,
+                s.lastName,
+                s.aliasTag,
+                s.isMinor,
+                s.status,
+                d.disasterID,
+                d.disasterType,
+                d.location,
+                d.disasterDateTime
+            FROM SurvivorRecord s
+            JOIN DisasterEvent d ON s.disasterID = d.disasterID
+            WHERE 1=1
+        """
+        params = []
+
+        if survivor_name:
+            search_query += " AND (s.firstName LIKE %s OR s.lastName LIKE %s)"
+            params.extend([f"%{survivor_name}%", f"%{survivor_name}%"])
+
+        if survivor_alias:
+            search_query += " AND s.aliasTag LIKE %s"
+            params.append(f"%{survivor_alias}%")
+
+        if disaster_id:
+            search_query += " AND s.disasterID = %s"
+            params.append(disaster_id)
+
+        search_query += " ORDER BY s.survivorID DESC"
+
+        cursor.execute(search_query, params)
+        survivors = cursor.fetchall()
+
+        cursor.execute("""
+            SELECT 
+                d.disasterID,
+                d.disasterType,
+                d.location,
+                d.disasterDateTime,
+                COUNT(s.survivorID) AS survivorCount
+            FROM DisasterEvent d
+            LEFT JOIN SurvivorRecord s ON d.disasterID = s.disasterID
+            GROUP BY d.disasterID, d.disasterType, d.location, d.disasterDateTime
+            ORDER BY d.disasterDateTime DESC
+        """)
+        disaster_summary = cursor.fetchall()
+
+        cursor.execute("""
+            SELECT disasterID, disasterType, location, disasterDateTime
+            FROM DisasterEvent
+            ORDER BY disasterDateTime DESC
+        """)
+        disasters = cursor.fetchall()
+
+    conn.close()
+
+    return render_template(
+        "staff_dashboard.html",
+        survivors=survivors,
+        disaster_summary=disaster_summary,
+        disasters=disasters
+    )
+
+@app.route("/staff/add-survivor", methods=["GET", "POST"])
 def add_survivor():
-    return render_template("add_survivor.html")
+    conn = get_db()
 
-@app.route("/staff/add-transfer")
+    with conn.cursor() as cursor:
+        cursor.execute("""
+            SELECT disasterID, disasterType, location, disasterDateTime
+            FROM DisasterEvent
+            ORDER BY disasterDateTime DESC
+        """)
+        disasters = cursor.fetchall()
+
+    if request.method == "POST":
+        first_name = request.form.get("firstName")
+        last_name = request.form.get("lastName")
+        alias_tag = request.form.get("aliasTag")
+        is_minor = request.form.get("isMinor")
+        status = request.form.get("status")
+        disaster_id = request.form.get("disasterID")
+
+        with conn.cursor() as cursor:
+            cursor.execute("""
+                INSERT INTO SurvivorRecord (
+                    firstName, lastName, aliasTag, isMinor, status, disasterID
+                )
+                VALUES (%s, %s, %s, %s, %s, %s)
+            """, (
+                first_name,
+                last_name,
+                alias_tag if alias_tag else None,
+                int(is_minor),
+                status,
+                disaster_id
+            ))
+            conn.commit()
+
+        conn.close()
+        return redirect(url_for("staff_dashboard"))
+
+    conn.close()
+    return render_template("add_survivor.html", disasters=disasters)
+
+@app.route("/staff/add-transfer", methods=["GET", "POST"])
 def add_transfer():
-    return render_template("add_transfer.html")
+    conn = get_db()
+
+    with conn.cursor() as cursor:
+        cursor.execute("""
+            SELECT survivorID, firstName, lastName, aliasTag, status
+            FROM SurvivorRecord
+            ORDER BY survivorID DESC
+        """)
+        survivors = cursor.fetchall()
+
+        cursor.execute("""
+            SELECT facilityID, facilityName
+            FROM Facility
+            ORDER BY facilityName
+        """)
+        facilities = cursor.fetchall()
+
+    if request.method == "POST":
+        survivor_id = request.form.get("survivorID")
+        from_facility_id = request.form.get("fromFacilityID")
+        to_facility_id = request.form.get("toFacilityID")
+        note_text = request.form.get("noteText")
+
+        user_id = 301
+
+        with conn.cursor() as cursor:
+            cursor.execute("""
+                INSERT INTO TransferEvent (
+                    survivorID, fromFacilityID, toFacilityID, userID, transferTime
+                )
+                VALUES (%s, %s, %s, %s, NOW())
+            """, (
+                survivor_id,
+                from_facility_id if from_facility_id else None,
+                to_facility_id,
+                user_id
+            ))
+
+            transfer_id = cursor.lastrowid
+
+            if note_text and note_text.strip():
+                cursor.execute("""
+                    INSERT INTO TransferNote (transferID, noteNo, noteText)
+                    VALUES (%s, 1, %s)
+                """, (transfer_id, note_text.strip()))
+
+            conn.commit()
+
+        conn.close()
+        return redirect(url_for("survivor_detail", survivor_id=survivor_id))
+
+    conn.close()
+    return render_template(
+        "add_transfer.html",
+        survivors=survivors,
+        facilities=facilities
+    )
 
 @app.route("/survivors/<int:survivor_id>")
 def survivor_detail(survivor_id):
@@ -193,8 +356,25 @@ def update_flag_status(flag_id):
     conn.close()
     return redirect(url_for("survivor_detail", survivor_id=survivor_id))
 
-##remove flag:
 
+@app.route("/survivors/<int:survivor_id>/status", methods=["POST"])
+def update_survivor_status(survivor_id):
+    conn = get_db()
+    new_status = request.form.get("status")
+
+    with conn.cursor() as cursor:
+        cursor.execute("""
+            UPDATE SurvivorRecord
+            SET status = %s
+            WHERE survivorID = %s
+        """, (new_status, survivor_id))
+        conn.commit()
+
+    conn.close()
+    return redirect(url_for("survivor_detail", survivor_id=survivor_id))
+
+
+##remove flag:
 @app.route("/flags/<int:flag_id>/remove", methods=["POST"])
 def remove_flag(flag_id):
     conn = get_db()
@@ -206,6 +386,21 @@ def remove_flag(flag_id):
             WHERE flagID = %s
         """, (flag_id,))
         conn.commit()
+    conn.close()
+    return redirect(url_for("survivor_detail", survivor_id=survivor_id))
+
+@app.route("/transfers/<int:transfer_id>/delete", methods=["POST"])
+def delete_transfer(transfer_id):
+    conn = get_db()
+    survivor_id = request.form.get("survivor_id")
+
+    with conn.cursor() as cursor:
+        cursor.execute("""
+            DELETE FROM TransferEvent
+            WHERE transferID = %s
+        """, (transfer_id,))
+        conn.commit()
+
     conn.close()
     return redirect(url_for("survivor_detail", survivor_id=survivor_id))
 
@@ -243,10 +438,19 @@ def disaster_detail(disaster_id):
         stats = cursor.fetchone()
 
     conn.close()
+<<<<<<< HEAD
     return render_template("disaster_detail.html", 
                            disaster=disaster, 
                            survivors=survivors,
                            stats=stats)
+=======
+    return render_template(
+        "disaster_detail.html",
+        disaster=disaster,
+        survivors=survivors,
+        stats=stats
+    )
+>>>>>>> 2c78b5a (completed responder/facility staff dashboard + forms + fixes)
 
 ##for testing dp connection
 @app.route("/db-test")

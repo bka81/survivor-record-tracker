@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Responder / Facility Staff Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/output.css') }}">
+</head>
+<body class="min-h-screen font-sans" style="color: var(--color-text); background: linear-gradient(180deg, var(--color-bg-950), var(--color-bg-900));">
+
+    <div class="flex justify-between items-center p-6 border-b border-[var(--color-border)]">
+        <div>
+            <h1 class="font-mono uppercase tracking-widest text-2xl font-bold">Field Operations</h1>
+            <p class="text-[var(--color-muted)] mt-1">
+                User: <span class="text-[var(--color-text)]">staff</span> |
+                Role: <span class="text-[var(--color-cyber)] font-semibold">RESPONDER / FACILITY STAFF</span>
+            </p>
+        </div>
+        <a href="/login" class="px-4 py-2 bg-[var(--color-danger)] text-black rounded-lg hover:brightness-110 transition-all inline-block">
+            ⇥ Logout
+        </a>
+    </div>
+
+    <div class="p-6">
+        <div class="flex flex-wrap gap-4 mb-6">
+            <a href="{{ url_for('add_survivor') }}" class="px-5 py-2 bg-[var(--color-warning)] text-black font-semibold rounded-lg hover:brightness-110 transition-all">
+                 Add New Survivor Record
+            </a>
+            <a href="{{ url_for('add_transfer') }}" class="px-5 py-2 bg-[var(--color-cyber)] text-black font-semibold rounded-lg hover:brightness-110 transition-all">
+                 Add Transfer Event
+            </a>
+        </div>
+
+        <div class="bg-[var(--color-surface)] rounded-lg p-6 mb-6 shadow-lg">
+            <h2 class="font-mono uppercase tracking-widest text-xl font-bold mb-4 text-[var(--color-matrix)]">⌕ Search Survivor Profile</h2>
+
+            <form method="GET" action="{{ url_for('staff_dashboard') }}" class="space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-[var(--color-muted)] mb-2">Name:</label>
+                        <input type="text" name="name" value="{{ request.args.get('name', '') }}"
+                               class="w-full px-3 py-2 bg-[var(--color-bg-900)] border border-[var(--color-border)] rounded-lg focus:outline-none focus:border-[var(--color-cyber)]">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-[var(--color-muted)] mb-2">Alias Tag:</label>
+                        <input type="text" name="aliasTag" value="{{ request.args.get('aliasTag', '') }}"
+                               class="w-full px-3 py-2 bg-[var(--color-bg-900)] border border-[var(--color-border)] rounded-lg focus:outline-none focus:border-[var(--color-cyber)]">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-[var(--color-muted)] mb-2">Disaster:</label>
+                        <select name="disasterID"
+                                class="w-full px-3 py-2 bg-[var(--color-bg-900)] border border-[var(--color-border)] rounded-lg focus:outline-none focus:border-[var(--color-cyber)]">
+                            <option value="">All Disasters</option>
+                            {% for disaster in disasters %}
+                            <option value="{{ disaster.disasterID }}"
+                                {% if request.args.get('disasterID') == disaster.disasterID|string %}selected{% endif %}>
+                                {{ disaster.disasterType }} - {{ disaster.location }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <div class="mt-4">
+                    <button type="submit" class="px-6 py-2 bg-[var(--color-cyber)] text-black font-semibold rounded-lg hover:brightness-110 transition-all">
+                        Search
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <div class="bg-[var(--color-surface)] rounded-lg p-6 mb-6 shadow-lg">
+            <h2 class="font-mono uppercase tracking-widest text-xl font-bold mb-4 text-[var(--color-matrix)]">Search Results</h2>
+
+            {% if survivors %}
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead class="bg-[var(--color-bg-900)] border-b border-[var(--color-border)]">
+                        <tr>
+                            <th class="px-4 py-3 text-left text-sm font-semibold text-[var(--color-muted)] uppercase tracking-wider">ID</th>
+                            <th class="px-4 py-3 text-left text-sm font-semibold text-[var(--color-muted)] uppercase tracking-wider">Name</th>
+                            <th class="px-4 py-3 text-left text-sm font-semibold text-[var(--color-muted)] uppercase tracking-wider">Alias</th>
+                            <th class="px-4 py-3 text-left text-sm font-semibold text-[var(--color-muted)] uppercase tracking-wider">Status</th>
+                            <th class="px-4 py-3 text-left text-sm font-semibold text-[var(--color-muted)] uppercase tracking-wider">Minor</th>
+                            <th class="px-4 py-3 text-left text-sm font-semibold text-[var(--color-muted)] uppercase tracking-wider">Disaster</th>
+                            <th class="px-4 py-3 text-left text-sm font-semibold text-[var(--color-muted)] uppercase tracking-wider">Location</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-[var(--color-border)]">
+                        {% for survivor in survivors %}
+                        <tr class="hover:bg-[var(--color-bg-900)] transition-colors">
+                            <td class="px-4 py-3 text-sm">{{ survivor.survivorID }}</td>
+                            <td class="px-4 py-3 text-sm">
+                                {% if survivor.firstName or survivor.lastName %}
+                                    {{ survivor.firstName or '' }} {{ survivor.lastName or '' }}
+                                {% else %}
+                                    Unidentified
+                                {% endif %}
+                            </td>
+                            <td class="px-4 py-3 text-sm">{{ survivor.aliasTag if survivor.aliasTag else 'N/A' }}</td>
+                            <td class="px-4 py-3 text-sm">{{ survivor.status }}</td>
+                            <td class="px-4 py-3 text-sm">
+                                <span class="px-2 py-1 rounded text-xs font-medium {% if survivor.isMinor %}bg-[var(--color-warning)] text-black{% else %}bg-[var(--color-bg-900)] text-[var(--color-muted)]{% endif %}">
+                                    {{ "Yes" if survivor.isMinor else "No" }}
+                                </span>
+                            </td>
+                            <td class="px-4 py-3 text-sm">{{ survivor.disasterType }}</td>
+                            <td class="px-4 py-3 text-sm">{{ survivor.location }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center text-[var(--color-muted)] py-8">
+                No matching survivor profile found.
+                <div class="mt-4">
+                    <a href="{{ url_for('add_survivor') }}" class="px-5 py-2 bg-[var(--color-success)] text-black font-semibold rounded-lg hover:brightness-110 transition-all inline-block">
+                        Create New Survivor Record
+                    </a>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="bg-[var(--color-surface)] rounded-lg p-6 shadow-lg">
+            <h2 class="font-mono uppercase tracking-widest text-xl font-bold mb-4 text-[var(--color-matrix)]">Number of Survivor Records Per Disaster</h2>
+
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead class="bg-[var(--color-bg-900)] border-b border-[var(--color-border)]">
+                        <tr>
+                            <th class="px-4 py-3 text-left text-sm font-semibold text-[var(--color-muted)] uppercase tracking-wider">Disaster ID</th>
+                            <th class="px-4 py-3 text-left text-sm font-semibold text-[var(--color-muted)] uppercase tracking-wider">Type</th>
+                            <th class="px-4 py-3 text-left text-sm font-semibold text-[var(--color-muted)] uppercase tracking-wider">Location</th>
+                            <th class="px-4 py-3 text-left text-sm font-semibold text-[var(--color-muted)] uppercase tracking-wider">Date / Time</th>
+                            <th class="px-4 py-3 text-left text-sm font-semibold text-[var(--color-muted)] uppercase tracking-wider">Survivor Count</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-[var(--color-border)]">
+                        {% for row in disaster_summary %}
+                        <tr class="hover:bg-[var(--color-bg-900)] transition-colors">
+                            <td class="px-4 py-3 text-sm">{{ row.disasterID }}</td>
+                            <td class="px-4 py-3 text-sm">{{ row.disasterType }}</td>
+                            <td class="px-4 py-3 text-sm">{{ row.location }}</td>
+                            <td class="px-4 py-3 text-sm">{{ row.disasterDateTime }}</td>
+                            <td class="px-4 py-3 text-sm font-semibold text-[var(--color-success)]">{{ row.survivorCount }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

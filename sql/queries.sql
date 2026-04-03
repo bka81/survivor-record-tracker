@@ -245,3 +245,30 @@ SELECT
 FROM Users u
 WHERE u.userEmail = ?
   AND u.userPassword = ?;
+
+
+-- Update survivor status
+UPDATE SurvivorRecord
+SET status = 'Reunited'
+WHERE survivorID = 101;
+
+-- Update flag status
+UPDATE Flag
+SET flagStatus = 'Resolved'
+WHERE flagID = 1;
+
+-- Delete with cascade demo
+SELECT * 
+FROM TransferEvent
+WHERE transferID = 1;
+
+SELECT * 
+FROM TransferNote
+WHERE transferID = 1;
+
+DELETE FROM TransferEvent
+WHERE transferID = 1;
+
+SELECT * 
+FROM TransferNote
+WHERE transferID = 1;
