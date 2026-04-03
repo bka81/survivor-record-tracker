@@ -1,121 +1,3 @@
-<!-- <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reviewer Dashboard</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/output.css') }}"></head>
-<body>
-    <div class="header">
-        <div class="header-title">
-            <h1>Command Center</h1>
-            <p>User: <span>reviewer</span> | Role: <span>REVIEWER</span></p>
-        </div>
-        <a href="/login" class="logout-btn">⇥ Logout</a>
-    </div>
-    <div class="stats-grid">
-        <div class="stat-card green">
-            <div class="stat-header">
-                <span class="stat-label">Total Survivors</span>
-                <span class="stat-icon">👤</span>
-            </div>
-            <div class="stat-value">{{ total_survivors }}</div>
-        </div>
-        <div class="stat-card cyan">
-            <div class="stat-header">
-                <span class="stat-label">Active Facilities</span>
-                <span class="stat-icon">🏢</span>
-            </div>
-            <div class="stat-value">{{ total_facilities }}</div>
-        </div>
-        <div class="stat-card orange">
-            <div class="stat-header">
-                <span class="stat-label">Flagged Cases</span>
-                <span class="stat-icon">🚩</span>
-            </div>
-            <div class="stat-value">{{ total_flags }}</div>
-        </div>
-        <div class="stat-card red">
-            <div class="stat-header">
-                <span class="stat-label">Active Disasters</span>
-                <span class="stat-icon">⚠️</span>
-            </div>
-            <div class="stat-value">{{ total_disasters }}</div>
-        </div>
-    </div>
-    <div class="main-layout">
-        <div class="search-panel">
-            <div class="section-title">⌕ Search Records</div>
-            <form method="GET" action="/reviewer/dashboard" class="filter-form">
-
-    <div>
-        <label class="filter-label">Disaster Type:
-            <select name="disasterType">
-                <option value="">ALL</option>
-                <option value="Earthquake">Earthquake</option>
-                <option value="Flood">Flood</option>
-                <option value="Tornado">Tornado</option>
-                <option value="Wildfire">Wildfire</option>
-    </div>
-            </select>
-        </label>
-        <label class="filter-label">Location:
-            <input type="text" name="location" placeholder="e.g Toronto">
-        </label>
-        <label class="filter-label">Status:
-            <select name="status" class="filter-select">
-                <option value="">ALL</option>
-                <option value="Active">Active</option>
-                <option value="Deceased">Deceased</option>
-                <option value="Unknown">Unknown</option>
-                <option value="Reunited">Reunited</option>
-                <option value="Closed">Closed</option>
-            </select>
-            <label class="checkbox-row">Minor:
-                <input type="checkbox" name="isMinor" value="yes">
-                </select>
-            </label>
-        </label>
-        <button type="submit" class="search-btn">Search</button>
-    </form>
-    </div>
-    </div>
-
-    {% if survivors is not defined or survivors|length == 0 %}
-    <div class="no-results"></div>
-    {% else %}   
-    <table class="results-table">
-        <tr>
-            <th>ID</th>
-            <th>First Name</th>
-            <th>Last Name</th>
-            <th>Alias</th>
-            <th>Minor</th>
-            <th>Status</th>
-            <th>Disaster Type</th>
-            <th>Location</th>
-            <th>Date</th>
-        </tr>
-        {% for s in survivors %}
-        <tr>
-            <td>{{ s.survivorID }}</td>
-            <td>{{ s.firstName }}</td>
-            <td>{{ s.lastName }}</td>
-            <td>{{ s.aliasTag }}</td>
-            <td>{{ "Yes" if s.isMinor else "No" }}</td>            
-            <td>{{ s.status }}</td>
-            <td>{{ s.disasterType }}</td>
-            <td>{{ s.location }}</td>
-            <td>{{ s.disasterDateTime }}</td>
-        </tr>
-        {% endfor %}
-    </table>
-    
-    {% endif %}
-</body>
-
-</html> -->
 
 <!DOCTYPE html>
 <html lang="en">
@@ -126,7 +8,7 @@
     <title>Reviewer Dashboard</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/output.css') }}">
 </head>
-<body class="min-h-screen font-sans" style="background: linear-gradient(180deg, var(--color-bg-950), var(--color-bg-900)); color: var(--color-text);">
+<body class="min-h-screen font-sans" style="color: var(--color-text); background: linear-gradient(180deg, var(--color-bg-950), var(--color-bg-900));">
     
     <!-- Header -->
     <div class="flex justify-between items-center p-6 border-b border-[var(--color-border)]">
@@ -134,14 +16,14 @@
             <h1 class="font-mono uppercase tracking-widest text-2xl font-bold">Command Center</h1>
             <p class="text-[var(--color-muted)] mt-1">User: <span class="text-[var(--color-text)]">reviewer</span> | Role: <span class="text-[var(--color-matrix)] font-semibold">REVIEWER</span></p>
         </div>
-        <a href="/login" class="px-4 py-2 bg-[var(--color-danger)] text-white rounded-lg hover:brightness-110 transition-all inline-block">
+        <a href="/login" class="px-4 py-2 bg-[var(--color-danger)] text-black rounded-lg hover:brightness-110 transition-all inline-block">
             ⇥ Logout
         </a>
     </div>
 
     <!-- Stats Grid -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 p-6">
-        <!-- Total Survivors Card -->
+        <!-- Total Survivors -->
         <div class="bg-[var(--color-surface)] rounded-lg p-6 border-l-4 border-[var(--color-success)] shadow-lg">
             <div class="flex justify-between items-center mb-2">
                 <span class="text-[var(--color-muted)] text-sm font-medium">Total Survivors</span>
@@ -150,7 +32,7 @@
             <div class="text-3xl font-bold text-[var(--color-success)]">{{ total_survivors }}</div>
         </div>
 
-        <!-- Active Facilities Card -->
+        <!-- Active Facilities -->
         <div class="bg-[var(--color-surface)] rounded-lg p-6 border-l-4 border-[var(--color-cyber)] shadow-lg">
             <div class="flex justify-between items-center mb-2">
                 <span class="text-[var(--color-muted)] text-sm font-medium">Active Facilities</span>
@@ -159,7 +41,7 @@
             <div class="text-3xl font-bold text-[var(--color-cyber)]">{{ total_facilities }}</div>
         </div>
 
-        <!-- Flagged Cases Card -->
+        <!-- Flagged Cases -->
         <div class="bg-[var(--color-surface)] rounded-lg p-6 border-l-4 border-[var(--color-warning)] shadow-lg">
             <div class="flex justify-between items-center mb-2">
                 <span class="text-[var(--color-muted)] text-sm font-medium">Flagged Cases</span>
@@ -168,7 +50,7 @@
             <div class="text-3xl font-bold text-[var(--color-warning)]">{{ total_flags }}</div>
         </div>
 
-        <!-- Active Disasters Card -->
+        <!-- Active Disasters -->
         <div class="bg-[var(--color-surface)] rounded-lg p-6 border-l-4 border-[var(--color-danger)] shadow-lg">
             <div class="flex justify-between items-center mb-2">
                 <span class="text-[var(--color-muted)] text-sm font-medium">Active Disasters</span>
@@ -178,9 +60,8 @@
         </div>
     </div>
 
-    <!-- Main Layout -->
+    <!-- Search Panel -->
     <div class="p-6">
-        <!-- Search Panel -->
         <div class="bg-[var(--color-surface)] rounded-lg p-6 mb-6 shadow-lg">
             <h2 class="font-mono uppercase tracking-widest text-xl font-bold mb-4 text-[var(--color-matrix)]">⌕ Search Records</h2>
             
@@ -196,12 +77,12 @@
                             <option value="Wildfire">Wildfire</option>
                         </select>
                     </div>
-
+                
                     <div>
                         <label class="block text-sm font-medium text-[var(--color-muted)] mb-2">Location:</label>
                         <input type="text" name="location" placeholder="e.g Toronto" class="w-full px-3 py-2 bg-[var(--color-bg-900)] border border-[var(--color-border)] rounded-lg focus:outline-none focus:border-[var(--color-cyber)]">
                     </div>
-
+                
                     <div>
                         <label class="block text-sm font-medium text-[var(--color-muted)] mb-2">Status:</label>
                         <select name="status" class="w-full px-3 py-2 bg-[var(--color-bg-900)] border border-[var(--color-border)] rounded-lg focus:outline-none focus:border-[var(--color-cyber)]">
@@ -213,21 +94,21 @@
                             <option value="Closed">Closed</option>
                         </select>
                     </div>
-
-                    <div class="flex items-end">
-                        <label class="flex items-center gap-2 text-sm font-medium text-[var(--color-muted)]">
-                            <input type="checkbox" name="isMinor" value="yes" class="w-4 h-4 rounded border-[var(--color-border)] bg-[var(--color-bg-900)] focus:ring-[var(--color-cyber)]">
-                            Minor
-                        </label>
+                
+                    <div>
+                        <label class="block text-sm font-medium text-[var(--color-muted)] mb-2">Minor:</label>
+                        <div class="flex items-center h-[42px]">
+                            <input type="checkbox" name="isMinor" value="yes" class="w-4 h-4 cursor-pointer">
+                            <span class="ml-2 text-sm font-medium text-[var(--color-muted)]"></span>
+                        </div>
                     </div>
                 </div>
-
-                <button type="submit" class="px-6 py-2 bg-[var(--color-cyber)] text-black font-semibold rounded-lg hover:brightness-110 transition-all">
-                    Search
-                </button>
-            </form>
-        </div>
-
+                
+                <div class="mt-6">
+                    <button type="submit" class="px-6 py-2 bg-[var(--color-cyber)] text-black font-semibold rounded-lg hover:brightness-110 transition-all">
+                        Search
+                    </button>
+                </div>                        
         <!-- Results Table -->
         {% if survivors is not defined or survivors|length == 0 %}
         <div class="bg-[var(--color-surface)] rounded-lg p-12 text-center text-[var(--color-muted)]">
