@@ -1,5 +1,7 @@
-CREATE DATABASE IF NOT EXISTS survivor_record_tracking;
+DROP DATABASE IF EXISTS survivor_record_tracking;
+CREATE DATABASE survivor_record_tracking;
 USE survivor_record_tracking;
+
 
 CREATE TABLE Users (
     userID INT PRIMARY KEY,
@@ -52,7 +54,7 @@ CREATE TABLE DisasterEvent (
 );
 
 CREATE TABLE SurvivorRecord (
-    survivorID INT PRIMARY KEY,
+    survivorID INT AUTO_INCREMENT PRIMARY KEY,
     firstName VARCHAR(100),
     lastName VARCHAR(100),
     aliasTag VARCHAR(100),
@@ -64,7 +66,7 @@ CREATE TABLE SurvivorRecord (
 );
 
 CREATE TABLE TransferEvent (
-    transferID INT PRIMARY KEY,
+    transferID INT AUTO_INCREMENT PRIMARY KEY,
     survivorID INT NOT NULL,
     fromFacilityID INT,
     toFacilityID INT NOT NULL,
@@ -85,7 +87,7 @@ CREATE TABLE TransferNote (
 );
 
 CREATE TABLE Flag (
-    flagID INT PRIMARY KEY,
+    flagID INT AUTO_INCREMENT PRIMARY KEY,
     userID INT NOT NULL,
     survivorID INT NOT NULL,
     flagStatus VARCHAR(50) NOT NULL,

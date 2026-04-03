@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, redirect, url_for
 from db_config import get_db
 
 
@@ -57,7 +57,7 @@ def reviewer_dashboard():
         cursor.execute("SELECT COUNT(*) AS total FROM Facility")
         total_facilities = cursor.fetchone()['total']
         
-        cursor.execute("SELECT COUNT(*) AS total FROM Flag WHERE FlagStatus='Open'")
+        cursor.execute("SELECT COUNT(*) AS total FROM Flag WHERE flagStatus='Open'")
         total_flags = cursor.fetchone()['total']
 
         cursor.execute("SELECT COUNT(*) AS total FROM DisasterEvent")
@@ -85,13 +85,143 @@ def add_survivor():
 def add_transfer():
     return render_template("add_transfer.html")
 
-@app.route("/survivors/1")
-def survivor_detail():
-    return render_template("survivor_detail.html")
+@app.route("/survivors/<int:survivor_id>")
+def survivor_detail(survivor_id):
+    conn = get_db()
+
+    with conn.cursor() as cursor:
+        cursor.execute("""
+            SELECT 
+                s.survivorID,
+                s.firstName,
+                s.lastName,
+                s.aliasTag,
+                s.isMinor,
+                s.status,
+                d.disasterType,
+                d.location,
+                d.disasterDateTime
+            FROM SurvivorRecord s
+            JOIN DisasterEvent d ON s.disasterID = d.disasterID
+            WHERE s.survivorID = %s
+        """, (survivor_id,))
+        survivor = cursor.fetchone()
+
+        if not survivor:
+            conn.close()
+            return "Survivor record not found", 404
+        
+        #Transfer timeline
+        cursor.execute("""
+            SELECT
+                t.transferID,
+                t.transferTime, 
+                f1.facilityName AS fromFacility,
+                f2.facilityName AS toFacility,
+                u.firstName AS handledByFirst,
+                u.lastName AS handledByLast,
+                tn.noteText
+            FROM TransferEvent t
+            LEFT JOIN Facility f1 ON t.fromFacilityID = f1.facilityID
+            JOIN Facility f2 ON t.toFacilityID = f2.facilityID
+            JOIN Users u ON t.userID = u.userID
+            LEFT JOIN TransferNote tn ON t.transferID = tn.transferID
+            WHERE t.survivorID = %s
+            ORDER BY t.transferTime DESC                       
+        """, (survivor_id,))
+        transfers = cursor.fetchall()
+
+        #All flags
+        cursor.execute("""
+            SELECT
+                flagID, 
+                flagStatus,
+                category, 
+                description,
+                createdAt
+            FROM Flag
+            WHERE survivorID = %s
+            ORDER BY createdAt DESC
+        """, (survivor_id,))
+        all_flags = cursor.fetchall()
+
+    conn.close()
+
+    current_location = transfers[0]["toFacility"] if transfers else None
+
+    return render_template("survivor_detail.html", 
+                           survivor=survivor,
+                           transfers = transfers, 
+                           all_flags = all_flags,
+                           current_location = current_location)
+
+@app.route("/survivors/<int:survivor_id>/flags/create", methods=["POST"])
+def create_flag(survivor_id):
+    conn=get_db()
+
+    #temporary until login page is implemented
+    reviewer_user_id = 311
+    flag_status = "Open"
+    category = request.form.get("category")
+    description =  request.form.get("description")
+
+    with conn.cursor() as cursor:
+        cursor.execute("""
+            INSERT INTO Flag(userID, survivorID, flagStatus, category, description, createdAt)
+            VALUES (%s, %s, %s, %s, %s, NOW())
+        """, (reviewer_user_id, survivor_id, flag_status, category, description))
+        conn.commit()
+    conn.close()
+
+    return redirect(url_for("survivor_detail", survivor_id = survivor_id))
+
+##update flag status:
+
+@app.route("/flags/<int:flag_id>/status", methods=["POST"])
+def update_flag_status(flag_id):
+    conn = get_db()
+    new_status = request.form.get("flagStatus")
+    survivor_id = request.form.get("survivor_id")
+
+    with conn.cursor() as cursor:
+        cursor.execute("""
+            UPDATE Flag
+            SET flagStatus = %s
+            WHERE flagID = %s
+        """, (new_status, flag_id))
+        conn.commit()
+    conn.close()
+    return redirect(url_for("survivor_detail", survivor_id=survivor_id))
+
+##remove flag:
+
+@app.route("/flags/<int:flag_id>/remove", methods=["POST"])
+def remove_flag(flag_id):
+    conn = get_db()
+    survivor_id = request.form.get("survivor_id")
+
+    with conn.cursor() as cursor:
+        cursor.execute("""
+            DELETE FROM Flag
+            WHERE flagID = %s
+        """, (flag_id,))
+        conn.commit()
+    conn.close()
+    return redirect(url_for("survivor_detail", survivor_id=survivor_id))
 
 @app.route("/disasters/1")
 def disaster_detail():
     return render_template("disaster_detail.html")
+
+##for testing dp connection
+@app.route("/db-test")
+def db_test():
+    conn = get_db()
+    with conn.cursor() as cursor:
+        cursor.execute("SELECT COUNT(*) AS total FROM SurvivorRecord")
+        result = cursor.fetchone()
+    conn.close()
+    return f"DB works. Survivor count: {result['total']}"
 
 if __name__ == "__main__":
     app.run(debug=True)
