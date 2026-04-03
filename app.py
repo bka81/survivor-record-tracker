@@ -209,9 +209,44 @@ def remove_flag(flag_id):
     conn.close()
     return redirect(url_for("survivor_detail", survivor_id=survivor_id))
 
-@app.route("/disasters/1")
-def disaster_detail():
-    return render_template("disaster_detail.html")
+@app.route("/disasters/<int:disaster_id>")
+def disaster_detail(disaster_id):
+    conn = get_db()
+    with conn.cursor() as cursor:
+        cursor.execute("""
+            SELECT disasterID, disasterType, location, disasterDateTime
+            FROM DisasterEvent
+            WHERE disasterID = %s
+        """, (disaster_id,))
+        disaster = cursor.fetchone()
+
+        if not disaster:
+            conn.close()
+            return "Disaster not found", 404
+
+        cursor.execute("""
+            SELECT survivorID, firstName, lastName, aliasTag, isMinor, status
+            FROM SurvivorRecord
+            WHERE disasterID = %s
+        """, (disaster_id,))
+        survivors = cursor.fetchall()
+
+        cursor.execute("""
+            SELECT 
+                COUNT(*) AS total,
+                SUM(CASE WHEN isMinor = TRUE THEN 1 ELSE 0 END) AS minors,
+                SUM(CASE WHEN status = 'Active' THEN 1 ELSE 0 END) AS active,
+                SUM(CASE WHEN status = 'Unknown' THEN 1 ELSE 0 END) AS unknown
+            FROM SurvivorRecord
+            WHERE disasterID = %s
+        """, (disaster_id,))
+        stats = cursor.fetchone()
+
+    conn.close()
+    return render_template("disaster_detail.html", 
+                           disaster=disaster, 
+                           survivors=survivors,
+                           stats=stats)
 
 ##for testing dp connection
 @app.route("/db-test")
