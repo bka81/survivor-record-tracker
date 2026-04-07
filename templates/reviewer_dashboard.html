@@ -65,7 +65,7 @@
         <div class="bg-[var(--color-surface)] rounded-lg p-6 mb-6 shadow-lg">
             <h2 class="font-mono uppercase tracking-widest text-xl font-bold mb-4 text-[var(--color-matrix)]">⌕ Search Records</h2>
             
-            <form method="GET" action="/reviewer/dashboard" class="space-y-4">
+            <form method="GET" action="{{ url_for('reviewer_dashboard') }}" class="space-y-4">
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                     <div>
                         <label class="block text-sm font-medium text-[var(--color-muted)] mb-2">Disaster Type:</label>
