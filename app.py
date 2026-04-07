@@ -438,20 +438,16 @@ def disaster_detail(disaster_id):
         stats = cursor.fetchone()
 
     conn.close()
-<<<<<<< HEAD
     return render_template("disaster_detail.html", 
                            disaster=disaster, 
                            survivors=survivors,
                            stats=stats)
-=======
     return render_template(
         "disaster_detail.html",
         disaster=disaster,
         survivors=survivors,
         stats=stats
     )
->>>>>>> 2c78b5a (completed responder/facility staff dashboard + forms + fixes)
-
 ##for testing dp connection
 @app.route("/db-test")
 def db_test():
