@@ -1,22 +1,77 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for,session
 from db_config import get_db
-
+from functools import wraps
 
 app = Flask(__name__)
+app.secret_key = 'your-secret-key-here-change-this-in-production'
 
 @app.route("/")
 def root():
-    return render_template("login.html")
+    return redirect(url_for('login')) 
 
-@app.route("/login")
+@app.route("/login", methods=["GET", "POST"])
 def login():
-    return render_template("login.html")
+    if request.method == "POST":
+        email = request.form.get("username")
+        
+        conn = get_db()
+        with conn.cursor() as cursor:
+            cursor.execute("""
+                SELECT userID, firstName, lastName 
+                FROM Users 
+                WHERE userEmail = %s
+            """, (email,))
+            user = cursor.fetchone()
+        conn.close()
+        
+        if user:
+            session['user_id'] = user['userID']
+            session['username'] = user['firstName']
+            
+            # Determine role based on userID
+            if user['userID'] == 311:  # Zara is reviewer
+                session['role'] = 'reviewer'
+                return redirect(url_for('reviewer_dashboard'))
+            else:
+                session['role'] = 'staff'
+                return redirect(url_for('staff_dashboard'))
+        else:
+            return render_template("login.html", error="User not found")
+    
+    return render_template("login.html")        
+
+@app.route("/logout")
+def logout():
+    session.clear()
+    return redirect(url_for('login'))
 
 @app.route("/home")
 def home():
     return render_template("home.html")
 
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'user_id' not in session:
+            flash('Please login first')
+            return redirect(url_for('login'))
+        return f(*args, **kwargs)
+    return decorated_function
+
+def role_required(required_role):
+    def decorator(f):
+        @wraps(f)
+        def decorated_function(*args, **kwargs):
+            if session.get('role') != required_role:
+                flash('Access denied')
+                return redirect(url_for('login'))
+            return f(*args, **kwargs)
+        return decorated_function
+    return decorator
+
 @app.route("/reviewer/dashboard")
+@login_required
+@role_required('reviewer')
 def reviewer_dashboard():
     disaster_type = request.args.get("disasterType")
     disaster_location = request.args.get("location")
@@ -74,6 +129,8 @@ def reviewer_dashboard():
     total_survivors=total_survivors)
 
 @app.route("/staff/dashboard")
+@login_required
+@role_required('staff')
 def staff_dashboard():
     survivor_name = request.args.get("name", "").strip()
     survivor_alias = request.args.get("aliasTag", "").strip()
@@ -259,6 +316,7 @@ def add_transfer():
     )
 
 @app.route("/survivors/<int:survivor_id>")
+@login_required
 def survivor_detail(survivor_id):
     conn = get_db()
 

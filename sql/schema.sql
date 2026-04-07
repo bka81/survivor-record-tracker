@@ -9,7 +9,7 @@ CREATE TABLE Users (
     lastName VARCHAR(100) NOT NULL,
     userEmail VARCHAR(100) NOT NULL UNIQUE,
     userPhoneNo VARCHAR(20) NOT NULL,
-    userPassword VARCHAR(255) NOT NULL
+    userPassword VARCHAR(255) NOT NULL,
 );
 
 CREATE TABLE Organization (
@@ -108,3 +108,8 @@ ADD CONSTRAINT transferNote_transfer_fk
 FOREIGN KEY (transferID)
 REFERENCES TransferEvent(transferID)
 ON DELETE CASCADE;
+
+INSERT INTO Users (userID, firstName, lastName, userEmail, userPhoneNo, userPassword) 
+VALUES 
+(1, 'John', 'Reviewer', 'reviewer@test.com', '555-0101', 'password123'),
+(2, 'Jane', 'Staff', 'staff@test.com', '555-0102', 'password123');

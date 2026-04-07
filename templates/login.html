@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="min-h-screen flex items-center justify-center px-4">
+  <div class="max-w-md w-full bg-[var(--color-surface)] rounded-2xl border border-[var(--color-border)] p-8 shadow-lg">
+    <h1 class="text-2xl font-mono uppercase tracking-widest text-[var(--color-matrix)] text-center mb-6">
+      Command Center
+    </h1>
+    
+    {% if error %}
+    <div class="bg-[var(--color-danger)]/20 border border-[var(--color-danger)] text-[var(--color-danger)] px-4 py-2 rounded-lg mb-4 text-sm">
+      {{ error }}
+    </div>
+    {% endif %}
+    
+    <form method="POST" action="{{ url_for('login') }}" class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium text-[var(--color-muted)] mb-2">Email Address</label>
+          <input type="email" name="username" placeholder="Email address" required
+                 class="w-full px-3 py-2 bg-[var(--color-bg-900)] border border-[var(--color-border)] rounded-lg focus:outline-none focus:border-[var(--color-cyber)]">
+        </div>
+        
+        <!-- <div>
+          <label class="block text-sm font-medium text-[var(--color-muted)] mb-2">Password</label>
+          <input type="password" name="password" required
+                 class="w-full px-3 py-2 bg-[var(--color-bg-900)] border border-[var(--color-border)] rounded-lg focus:outline-none focus:border-[var(--color-cyber)]">
+        </div>  -->
+        <div class="text-center">
+            <button type="submit" 
+                    class="px-6 py-2 bg-[var(--color-cyber)] text-black font-semibold rounded-lg hover:brightness-110 transition-all">
+              Login
+            </button>
+          </div>        
+        </form>
+{% endblock %}
