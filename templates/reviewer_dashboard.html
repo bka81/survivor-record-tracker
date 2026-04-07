@@ -132,22 +132,23 @@
                 </thead>
                 <tbody class="divide-y divide-[var(--color-border)]">
                     {% for s in survivors %}
-                    <tr class="hover:bg-[var(--color-bg-900)] transition-colors">
-                        <td class="px-4 py-3 text-sm">{{ s.survivorID }}</td>
-                        <td class="px-4 py-3 text-sm">{{ s.firstName }}</td>
-                        <td class="px-4 py-3 text-sm">{{ s.lastName }}</td>
-                        <td class="px-4 py-3 text-sm">{{ s.aliasTag }}</td>
-                        <td class="px-4 py-3 text-sm">
-                            <span class="px-2 py-1 rounded text-xs font-medium {% if s.isMinor %}bg-[var(--color-warning)] text-black{% else %}bg-[var(--color-bg-900)] text-[var(--color-muted)]{% endif %}">
-                                {{ "Yes" if s.isMinor else "No" }}
-                            </span>
-                        </td>
-                        <td class="px-4 py-3 text-sm">{{ s.status }}</td>
-                        <td class="px-4 py-3 text-sm">{{ s.disasterType }}</td>
-                        <td class="px-4 py-3 text-sm">{{ s.location }}</td>
-                        <td class="px-4 py-3 text-sm">{{ s.disasterDateTime }}</td>
-                    </tr>
-                    {% endfor %}
+                    <tr class="hover:bg-[var(--color-bg-900)] transition-colors cursor-pointer" 
+                    onclick='window.location.href="/survivors/{{ s.survivorID }}"'>
+                    <td class="px-4 py-3 text-sm">{{ s.survivorID }}</td>
+                    <td class="px-4 py-3 text-sm">{{ s.firstName }}</td>
+                    <td class="px-4 py-3 text-sm">{{ s.lastName }}</td>
+                    <td class="px-4 py-3 text-sm">{{ s.aliasTag }}</td>
+                    <td class="px-4 py-3 text-sm">
+                        <span class="px-2 py-1 rounded text-xs font-medium {% if s.isMinor %}bg-[var(--color-warning)] text-black{% else %}bg-[var(--color-bg-900)] text-[var(--color-muted)]{% endif %}">
+                            {{ "Yes" if s.isMinor else "No" }}
+                        </span>
+                    </td>
+                    <td class="px-4 py-3 text-sm">{{ s.status }}</td>
+                    <td class="px-4 py-3 text-sm">{{ s.disasterType }}</td>
+                    <td class="px-4 py-3 text-sm">{{ s.location }}</td>
+                    <td class="px-4 py-3 text-sm">{{ s.disasterDateTime }}</td>
+                </tr>                    
+                {% endfor %}
                 </tbody>
             </table>
         </div>

@@ -162,17 +162,22 @@ def add_survivor():
         first_name = request.form.get("firstName")
         last_name = request.form.get("lastName")
         alias_tag = request.form.get("aliasTag")
-        is_minor = request.form.get("isMinor")
+        is_minor = 1 if request.form.get("isMinor") else 0 
         status = request.form.get("status")
         disaster_id = request.form.get("disasterID")
+        
+        with conn.cursor() as cursor: 
+            cursor.execute("SELECT COALESCE(MAX(survivorID), 0) + 1 AS next_id FROM SurvivorRecord")
+            result = cursor.fetchone()
+            next_id = result['next_id']
 
-        with conn.cursor() as cursor:
             cursor.execute("""
                 INSERT INTO SurvivorRecord (
-                    firstName, lastName, aliasTag, isMinor, status, disasterID
+                    survivorID, firstName, lastName, aliasTag, isMinor, status, disasterID
                 )
-                VALUES (%s, %s, %s, %s, %s, %s)
+                VALUES (%s, %s, %s, %s, %s, %s, %s)
             """, (
+                next_id,
                 first_name,
                 last_name,
                 alias_tag if alias_tag else None,
@@ -216,19 +221,24 @@ def add_transfer():
         user_id = 301
 
         with conn.cursor() as cursor:
+            cursor.execute("SELECT COALESCE(MAX(transferID), 0) + 1 AS next_id FROM TransferEvent")
+            result = cursor.fetchone()
+            next_id = result['next_id']
+
             cursor.execute("""
                 INSERT INTO TransferEvent (
-                    survivorID, fromFacilityID, toFacilityID, userID, transferTime
+                    transferID, survivorID, fromFacilityID, toFacilityID, userID, transferTime
                 )
-                VALUES (%s, %s, %s, %s, NOW())
+                VALUES (%s, %s, %s, %s, %s, NOW())
             """, (
+                next_id,
                 survivor_id,
                 from_facility_id if from_facility_id else None,
                 to_facility_id,
                 user_id
             ))
 
-            transfer_id = cursor.lastrowid
+            transfer_id = next_id
 
             if note_text and note_text.strip():
                 cursor.execute("""
@@ -329,11 +339,16 @@ def create_flag(survivor_id):
     description =  request.form.get("description")
 
     with conn.cursor() as cursor:
-        cursor.execute("""
-            INSERT INTO Flag(userID, survivorID, flagStatus, category, description, createdAt)
-            VALUES (%s, %s, %s, %s, %s, NOW())
-        """, (reviewer_user_id, survivor_id, flag_status, category, description))
-        conn.commit()
+            cursor.execute("SELECT COALESCE(MAX(flagID), 0) + 1 AS next_id FROM Flag")
+            result = cursor.fetchone()
+            next_id = result['next_id']
+
+
+            cursor.execute("""
+            INSERT INTO Flag(flagID, userID, survivorID, flagStatus, category, description, createdAt)
+            VALUES (%s, %s, %s, %s, %s, %s, NOW())
+        """, (next_id, reviewer_user_id, survivor_id, flag_status, category, description))
+            conn.commit()
     conn.close()
 
     return redirect(url_for("survivor_detail", survivor_id = survivor_id))

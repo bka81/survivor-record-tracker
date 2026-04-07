@@ -99,3 +99,12 @@ CREATE TABLE Flag (
     CONSTRAINT flag_survivor_fk FOREIGN KEY (survivorID) REFERENCES SurvivorRecord(survivorID),
     CONSTRAINT check_flag_status CHECK (flagStatus IN ('Open', 'Resolved'))
 );
+
+ALTER TABLE TransferNote
+DROP FOREIGN KEY transferNote_transfer_fk;
+
+ALTER TABLE TransferNote
+ADD CONSTRAINT transferNote_transfer_fk
+FOREIGN KEY (transferID)
+REFERENCES TransferEvent(transferID)
+ON DELETE CASCADE;
