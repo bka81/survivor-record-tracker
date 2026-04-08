@@ -1,53 +1,12 @@
-from flask import Flask, render_template, request, redirect, url_for,session
+from flask import Flask, render_template, request, redirect, url_for, session, flash
 from db_config import get_db
 from functools import wraps
 
 app = Flask(__name__)
 app.secret_key = 'your-secret-key-here-change-this-in-production'
 
-@app.route("/")
-def root():
-    return redirect(url_for('login')) 
-
-@app.route("/login", methods=["GET", "POST"])
-def login():
-    if request.method == "POST":
-        email = request.form.get("username")
-        
-        conn = get_db()
-        with conn.cursor() as cursor:
-            cursor.execute("""
-                SELECT userID, firstName, lastName 
-                FROM Users 
-                WHERE userEmail = %s
-            """, (email,))
-            user = cursor.fetchone()
-        conn.close()
-        
-        if user:
-            session['user_id'] = user['userID']
-            session['username'] = user['firstName']
-            
-            # Determine role based on userID
-            if user['userID'] == 311:  # Zara is reviewer
-                session['role'] = 'reviewer'
-                return redirect(url_for('reviewer_dashboard'))
-            else:
-                session['role'] = 'staff'
-                return redirect(url_for('staff_dashboard'))
-        else:
-            return render_template("login.html", error="User not found")
-    
-    return render_template("login.html")        
-
-@app.route("/logout")
-def logout():
-    session.clear()
-    return redirect(url_for('login'))
-
-@app.route("/home")
-def home():
-    return render_template("home.html")
+# login with email of responder eg daniel.lee@example.com(directs to staff dashboard), facility staff eg noah.wilson@example.com (directs to staff dashboard) or
+# reviewer eg zara.ahmed@example.com (directs to staff dashboard))
 
 def login_required(f):
     @wraps(f)
@@ -58,16 +17,71 @@ def login_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
-def role_required(required_role):
+def role_required(*allowed_roles):
     def decorator(f):
         @wraps(f)
         def decorated_function(*args, **kwargs):
-            if session.get('role') != required_role:
+            if session.get('role') not in allowed_roles:
                 flash('Access denied')
                 return redirect(url_for('login'))
             return f(*args, **kwargs)
         return decorated_function
     return decorator
+
+@app.route("/")
+def root():
+    return redirect(url_for('login'))
+
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    if request.method == "POST":
+        email = request.form.get("username")
+        
+        conn = get_db()
+        with conn.cursor() as cursor:
+            cursor.execute("""
+                SELECT u.userID, u.firstName, u.lastName,
+                       CASE 
+                           WHEN r.userID IS NOT NULL THEN 'reviewer'
+                           WHEN fs.userID IS NOT NULL THEN 'facility_staff'
+                           WHEN res.userID IS NOT NULL THEN 'responder'
+                           ELSE 'unknown'
+                       END as role
+                FROM Users u
+                LEFT JOIN Reviewer r ON u.userID = r.userID
+                LEFT JOIN FacilityStaff fs ON u.userID = fs.userID
+                LEFT JOIN Responder res ON u.userID = res.userID
+                WHERE u.userEmail = %s 
+            """, (email,))
+            user = cursor.fetchone()
+        conn.close()
+        
+        if user:
+            session['user_id'] = user['userID']
+            session['username'] = user['firstName']
+            session['role'] = user['role']
+            
+            if user['role'] == 'reviewer':
+                return redirect(url_for('reviewer_dashboard'))
+            elif user['role'] == 'facility_staff':
+                return redirect(url_for('staff_dashboard'))
+            elif user['role'] == 'responder':
+                return redirect(url_for('staff_dashboard'))
+            else:
+                return redirect(url_for('home'))
+        else:
+            return render_template("login.html", error="Invalid credentials")
+    
+    return render_template("login.html")
+
+@app.route("/logout")
+def logout():
+    session.clear()
+    return redirect(url_for('login'))
+
+@app.route("/home")
+def home():
+    return render_template("home.html")
 
 @app.route("/reviewer/dashboard")
 @login_required
@@ -98,9 +112,6 @@ def reviewer_dashboard():
         query += " AND s.isMinor = %s"
         params.append(1)
 
-    print("QUERY:", query)
-    print("PARAMS:", params)
-
     conn = get_db()
     with conn.cursor() as cursor: 
         cursor.execute(query, params)
@@ -118,19 +129,18 @@ def reviewer_dashboard():
         cursor.execute("SELECT COUNT(*) AS total FROM DisasterEvent")
         total_disasters = cursor.fetchone()['total']
 
-
     conn.close()
 
     return render_template("reviewer_dashboard.html",
-    survivors=results, 
-    total_disasters=total_disasters,
-    total_facilities=total_facilities,
-    total_flags=total_flags,
-    total_survivors=total_survivors)
+        survivors=results, 
+        total_disasters=total_disasters,
+        total_facilities=total_facilities,
+        total_flags=total_flags,
+        total_survivors=total_survivors)
 
 @app.route("/staff/dashboard")
 @login_required
-@role_required('staff')
+@role_required('responder', 'facility_staff')
 def staff_dashboard():
     survivor_name = request.args.get("name", "").strip()
     survivor_alias = request.args.get("aliasTag", "").strip()
@@ -249,6 +259,7 @@ def add_survivor():
 
     conn.close()
     return render_template("add_survivor.html", disasters=disasters)
+
 
 @app.route("/staff/add-transfer", methods=["GET", "POST"])
 def add_transfer():
@@ -382,10 +393,10 @@ def survivor_detail(survivor_id):
 
     return render_template("survivor_detail.html", 
                            survivor=survivor,
-                           transfers = transfers, 
-                           all_flags = all_flags,
-                           current_location = current_location)
-
+                           transfers=transfers, 
+                           all_flags=all_flags,
+                           current_location=current_location)
+                           
 @app.route("/survivors/<int:survivor_id>/flags/create", methods=["POST"])
 def create_flag(survivor_id):
     conn=get_db()
@@ -514,14 +525,8 @@ def disaster_detail(disaster_id):
     return render_template("disaster_detail.html", 
                            disaster=disaster, 
                            survivors=survivors,
-                           stats=stats)
-    return render_template(
-        "disaster_detail.html",
-        disaster=disaster,
-        survivors=survivors,
-        stats=stats
-    )
-##for testing dp connection
+                           stats=stats)  # Removed duplicate return
+
 @app.route("/db-test")
 def db_test():
     conn = get_db()

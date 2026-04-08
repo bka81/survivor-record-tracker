@@ -109,7 +109,3 @@ FOREIGN KEY (transferID)
 REFERENCES TransferEvent(transferID)
 ON DELETE CASCADE;
 
-INSERT INTO Users (userID, firstName, lastName, userEmail, userPhoneNo, userPassword) 
-VALUES 
-(1, 'John', 'Reviewer', 'reviewer@test.com', '555-0101', 'password123'),
-(2, 'Jane', 'Staff', 'staff@test.com', '555-0102', 'password123');
