@@ -177,19 +177,25 @@ def register():
 @login_required
 @role_required('reviewer')
 def reviewer_dashboard():
+    # Survivor search params
+    searched = request.args.get("searched")
+    status = request.args.get("status", "").strip()
+    is_minor = request.args.get("isMinor")
+    open_flags_only = request.args.get("openFlagsOnly")
+
+    # Disaster search params
+    disaster_searched = request.args.get("disasterSearched")
     disaster_type = request.args.get("disasterType", "").strip()
     disaster_location = request.args.get("location", "").strip()
-    status = request.args.get("status", "").strip()
-    isMinor = request.args.get("isMinor")
-    open_flags_only = request.args.get("openFlagsOnly")
-    searched = request.args.get("searched")
 
-    results = []
+    survivors = []
+    disasters = []
 
     conn = get_db()
     with conn.cursor() as cursor:
+        # Survivor search
         if searched:
-            query = """
+            survivor_query = """
                 SELECT DISTINCT
                     s.survivorID,
                     s.firstName,
@@ -208,31 +214,54 @@ def reviewer_dashboard():
                    AND f.flagStatus = 'Open'
                 WHERE 1=1
             """
-            params = []
-
-            if disaster_type:
-                query += " AND d.disasterType = %s"
-                params.append(disaster_type)
-
-            if disaster_location:
-                query += " AND d.location LIKE %s"
-                params.append(f"%{disaster_location}%")
+            survivor_params = []
 
             if status:
-                query += " AND s.status = %s"
-                params.append(status)
+                survivor_query += " AND s.status = %s"
+                survivor_params.append(status)
 
-            if isMinor:
-                query += " AND s.isMinor = %s"
-                params.append(1)
+            if is_minor:
+                survivor_query += " AND s.isMinor = %s"
+                survivor_params.append(1)
 
             if open_flags_only:
-                query += " AND f.flagID IS NOT NULL"
+                survivor_query += " AND f.flagID IS NOT NULL"
 
-            query += " ORDER BY s.survivorID DESC"
+            survivor_query += " ORDER BY s.survivorID DESC"
 
-            cursor.execute(query, params)
-            results = cursor.fetchall()
+            cursor.execute(survivor_query, survivor_params)
+            survivors = cursor.fetchall()
+
+        # Disaster search
+        if disaster_searched:
+            disaster_query = """
+                SELECT
+                    d.disasterID,
+                    d.disasterType,
+                    d.location,
+                    d.disasterDateTime,
+                    COUNT(s.survivorID) AS survivorCount
+                FROM DisasterEvent d
+                LEFT JOIN SurvivorRecord s ON d.disasterID = s.disasterID
+                WHERE 1=1
+            """
+            disaster_params = []
+
+            if disaster_type:
+                disaster_query += " AND d.disasterType = %s"
+                disaster_params.append(disaster_type)
+
+            if disaster_location:
+                disaster_query += " AND d.location LIKE %s"
+                disaster_params.append(f"%{disaster_location}%")
+
+            disaster_query += """
+                GROUP BY d.disasterID, d.disasterType, d.location, d.disasterDateTime
+                ORDER BY d.disasterDateTime DESC
+            """
+
+            cursor.execute(disaster_query, disaster_params)
+            disasters = cursor.fetchall()
 
         cursor.execute("SELECT COUNT(*) AS total FROM SurvivorRecord")
         total_survivors = cursor.fetchone()['total']
@@ -250,12 +279,14 @@ def reviewer_dashboard():
 
     return render_template(
         "reviewer_dashboard.html",
-        survivors=results,
-        total_disasters=total_disasters,
+        survivors=survivors,
+        disasters=disasters,
+        searched=searched,
+        disasterSearched=disaster_searched,
+        total_survivors=total_survivors,
         total_facilities=total_facilities,
         total_flags=total_flags,
-        total_survivors=total_survivors,
-        searched=searched
+        total_disasters=total_disasters
     )
 
 @app.route("/staff/dashboard")
