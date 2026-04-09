@@ -69,6 +69,7 @@ def login():
         if user:
             session['user_id'] = user['userID']
             session['username'] = user['firstName']
+            session['userFullName'] = f"{user['firstName']} {user['lastName']}"
             session['role'] = user['role']
 
             if user['role'] == 'reviewer':
@@ -318,8 +319,10 @@ def staff_dashboard():
         params = []
 
         if survivor_name:
-            search_query += " AND (s.firstName LIKE %s OR s.lastName LIKE %s)"
-            params.extend([f"%{survivor_name}%", f"%{survivor_name}%"])
+            search_query += """
+                AND TRIM(CONCAT(COALESCE(s.firstName, ''), ' ', COALESCE(s.lastName, ''))) LIKE %s
+            """
+            params.append(f"%{'%'.join(survivor_name.split())}%")
 
         if survivor_alias:
             search_query += " AND s.aliasTag LIKE %s"

@@ -9,15 +9,15 @@
 <body class="min-h-screen font-sans" style="color: var(--color-text); background: linear-gradient(180deg, var(--color-bg-950), var(--color-bg-900));">
 
     <div class="flex justify-between items-center p-6 border-b border-[var(--color-border)]">
-        <div>
-            <h1 class="font-mono uppercase tracking-widest text-2xl font-bold">Field Operations</h1>
-            <p class="text-[var(--color-muted)] mt-1">
-                User: <span class="text-[var(--color-text)]">staff</span> |
-                Role: <span class="text-[var(--color-cyber)] font-semibold">RESPONDER / FACILITY STAFF</span>
-            </p>
-        </div>
-        <a href="/login" class="px-4 py-2 bg-[var(--color-danger)] text-black rounded-lg hover:brightness-110 transition-all inline-block">
-            ⇥ Logout
+    <div>
+        <h1 class="font-mono uppercase tracking-widest text-2xl font-bold text-matrix">Field Operations</h1>
+        <p class="text-[var(--color-muted)] mt-1">
+            User: <span class="text-[var(--color-text)]">{{ session.get('userFullName', 'Unknown') }}</span> |
+            Role: <span class="text-[var(--color-cyber)] font-semibold">{{ session.get('role', '').replace('_', ' ').upper() }}</span>
+        </p>
+    </div>
+        <a href="{{ url_for('logout') }}" class="px-4 py-2 bg-[var(--color-danger)] text-black rounded-lg hover:brightness-110 transition-all inline-block">
+        Logout
         </a>
     </div>
 
@@ -32,7 +32,7 @@
         </div>
 
         <div class="bg-[var(--color-surface)] rounded-lg p-6 mb-6 shadow-lg">
-            <h2 class="font-mono uppercase tracking-widest text-xl font-bold mb-4 text-[var(--color-matrix)]">⌕ Search Survivor Profile</h2>
+            <h2 class="font-mono uppercase tracking-widest text-xl font-bold mb-4 text-[var(--color-matrix)]">Search Survivor Profile</h2>
 
             <form method="GET" action="{{ url_for('staff_dashboard') }}" class="space-y-4">
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">

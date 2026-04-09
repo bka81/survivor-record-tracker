@@ -13,11 +13,11 @@
     <!-- Header -->
     <div class="flex justify-between items-center p-6 border-b border-[var(--color-border)]">
         <div>
-            <h1 class="font-mono uppercase tracking-widest text-2xl font-bold">Command Center</h1>
-            <p class="text-[var(--color-muted)] mt-1">User: <span class="text-[var(--color-text)]">reviewer</span> | Role: <span class="text-[var(--color-matrix)] font-semibold">REVIEWER</span></p>
+            <h1 class="font-mono uppercase tracking-widest text-2xl font-bold text-matrix">Command Center</h1>
+            <p class="text-[var(--color-muted)] mt-1">User: <span class="text-[var(--color-text)]">{{session.get('userFullName')}}</span> | Role: <span class="text-[var(--color-matrix)] font-semibold">REVIEWER</span></p>
         </div>
-        <a href="/login" class="px-4 py-2 bg-[var(--color-danger)] text-black rounded-lg hover:brightness-110 transition-all inline-block">
-            ⇥ Logout
+        <a href="{{ url_for('logout') }}" class="px-4 py-2 bg-[var(--color-danger)] text-black rounded-lg hover:brightness-110 transition-all inline-block">
+            Logout
         </a>
         </div>
 
