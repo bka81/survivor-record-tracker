@@ -34,96 +34,213 @@ def root():
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
+    conn = get_db()
+
+    with conn.cursor() as cursor:
+        cursor.execute("SELECT orgID, orgName FROM Organization ORDER BY orgName")
+        organizations = cursor.fetchall()
+
+        cursor.execute("SELECT facilityID, facilityName FROM Facility ORDER BY facilityName")
+        facilities = cursor.fetchall()
+
     if request.method == "POST":
-        email = request.form.get("username")
-        
-        conn = get_db()
+        email = request.form.get("username", "").strip()
+        password = request.form.get("password", "").strip()
+
         with conn.cursor() as cursor:
             cursor.execute("""
                 SELECT u.userID, u.firstName, u.lastName,
-                       CASE 
+                       CASE
                            WHEN r.userID IS NOT NULL THEN 'reviewer'
                            WHEN fs.userID IS NOT NULL THEN 'facility_staff'
                            WHEN res.userID IS NOT NULL THEN 'responder'
                            ELSE 'unknown'
-                       END as role
+                       END AS role
                 FROM Users u
                 LEFT JOIN Reviewer r ON u.userID = r.userID
                 LEFT JOIN FacilityStaff fs ON u.userID = fs.userID
                 LEFT JOIN Responder res ON u.userID = res.userID
-                WHERE u.userEmail = %s 
-            """, (email,))
+                WHERE u.userEmail = %s AND u.userPassword = %s
+            """, (email, password))
             user = cursor.fetchone()
+
         conn.close()
-        
+
         if user:
             session['user_id'] = user['userID']
             session['username'] = user['firstName']
             session['role'] = user['role']
-            
+
             if user['role'] == 'reviewer':
                 return redirect(url_for('reviewer_dashboard'))
-            elif user['role'] == 'facility_staff':
+            elif user['role'] in ['responder', 'facility_staff']:
                 return redirect(url_for('staff_dashboard'))
-            elif user['role'] == 'responder':
-                return redirect(url_for('staff_dashboard'))
-            else:
-                return redirect(url_for('home'))
-        else:
-            return render_template("login.html", error="Invalid credentials")
-    
-    return render_template("login.html")
+
+        return render_template(
+            "login.html",
+            error="Invalid email or password",
+            organizations=organizations,
+            facilities=facilities
+        )
+
+    conn.close()
+    return render_template(
+        "login.html",
+        organizations=organizations,
+        facilities=facilities
+    )
 
 @app.route("/logout")
 def logout():
     session.clear()
     return redirect(url_for('login'))
 
-@app.route("/home")
-def home():
-    return render_template("home.html")
+@app.route("/register", methods=["POST"])
+def register():
+    first_name = request.form.get("firstName", "").strip()
+    last_name = request.form.get("lastName", "").strip()
+    email = request.form.get("userEmail", "").strip()
+    phone = request.form.get("userPhoneNo", "").strip()
+    password = request.form.get("userPassword", "").strip()
+    role = request.form.get("role", "").strip()
+    org_id = request.form.get("orgID", "").strip()
+    facility_id = request.form.get("facilityID", "").strip()
+
+    conn= get_db()
+    with conn.cursor() as cursor:
+        cursor.execute("SELECT orgID, orgName FROM Organization ORDER BY orgName")
+        organizations =cursor.fetchall()
+
+        cursor.execute("SELECT facilityID,facilityName FROM Facility ORDER BY facilityName")
+        facilities = cursor.fetchall()
+
+        cursor.execute("SELECT userID FROM Users WHERE userEmail = %s", (email,))
+        existing_user = cursor.fetchone()
+
+        if existing_user:
+            conn.close()
+            return render_template("login.html", 
+                error="An account with that email already exists",
+                organizations=organizations,
+                facilities=facilities)
+        
+        if role == "responder" and not org_id:
+            conn.close()
+            return render_template("login.html", 
+                error="Please select an organization",
+                organizations=organizations,
+                facilities=facilities)
+        
+        if role == "facility_staff" and not facility_id:
+            conn.close()
+            return render_template("login.html", 
+                error="Please select a facility",
+                organizations=organizations,
+                facilities=facilities)
+        
+        if role not in["reviewer", "responder", "facility_staff"]:
+            conn.close()
+            return render_template("login.html", 
+                error="Please choose a valid role",
+                organizations=organizations,
+                facilities=facilities)
+        
+        cursor.execute("SELECT COALESCE(MAX(userID),0) + 1 AS next_id FROM Users")
+        next_id = cursor.fetchone()["next_id"]
+
+        cursor.execute("""
+            INSERT INTO Users (userID, firstName, lastName, userEmail, userPhoneNo, userPassword)
+            VALUES (%s, %s, %s, %s, %s, %s)
+        """,(next_id, first_name, last_name, email, phone, password))
+
+        if role == "reviewer":
+            cursor.execute("""
+                INSERT INTO Reviewer (userID)
+                VALUES (%s)
+        """, (next_id, ))
+        elif role == "responder":
+            cursor.execute("""
+                INSERT INTO Responder (userID, orgID)
+                VALUES (%s, %s)
+        """, (next_id, org_id))
+        elif role == "facility_staff":
+            cursor.execute("""
+                INSERT INTO FacilityStaff (userID, facilityID)
+                VALUES (%s, %s)
+        """, (next_id, facility_id))
+    conn.commit()
+    conn.close()
+
+    return redirect(url_for("login"))
 
 @app.route("/reviewer/dashboard")
 @login_required
 @role_required('reviewer')
 def reviewer_dashboard():
-    disaster_type = request.args.get("disasterType")
-    disaster_location = request.args.get("location")
-    status = request.args.get("status")
+    disaster_type = request.args.get("disasterType", "").strip()
+    disaster_location = request.args.get("location", "").strip()
+    status = request.args.get("status", "").strip()
     isMinor = request.args.get("isMinor")
+    open_flags_only = request.args.get("openFlagsOnly")
+    searched = request.args.get("searched")
 
-    query = """
-    SELECT s.survivorID, s.firstName, s.lastName, s.aliasTag, s.status, s.isMinor, d.disasterType, d.location, d.disasterDateTime
-    FROM SurvivorRecord s
-    JOIN DisasterEvent d ON s.disasterID = d.disasterID
-    WHERE 1=1
-    """
-    params = []
-    if disaster_type:
-        query += " AND d.disasterType = %s"
-        params.append(disaster_type)
-    if disaster_location:
-        query += " AND d.location LIKE %s"
-        params.append(f"%{disaster_location}%")
-    if status:
-        query += " AND s.status = %s"
-        params.append(status)
-    if isMinor:
-        query += " AND s.isMinor = %s"
-        params.append(1)
+    results = []
 
     conn = get_db()
-    with conn.cursor() as cursor: 
-        cursor.execute(query, params)
-        results = cursor.fetchall()
+    with conn.cursor() as cursor:
+        if searched:
+            query = """
+                SELECT DISTINCT
+                    s.survivorID,
+                    s.firstName,
+                    s.lastName,
+                    s.aliasTag,
+                    s.status,
+                    s.isMinor,
+                    d.disasterID,
+                    d.disasterType,
+                    d.location,
+                    d.disasterDateTime
+                FROM SurvivorRecord s
+                JOIN DisasterEvent d ON s.disasterID = d.disasterID
+                LEFT JOIN Flag f
+                    ON s.survivorID = f.survivorID
+                   AND f.flagStatus = 'Open'
+                WHERE 1=1
+            """
+            params = []
+
+            if disaster_type:
+                query += " AND d.disasterType = %s"
+                params.append(disaster_type)
+
+            if disaster_location:
+                query += " AND d.location LIKE %s"
+                params.append(f"%{disaster_location}%")
+
+            if status:
+                query += " AND s.status = %s"
+                params.append(status)
+
+            if isMinor:
+                query += " AND s.isMinor = %s"
+                params.append(1)
+
+            if open_flags_only:
+                query += " AND f.flagID IS NOT NULL"
+
+            query += " ORDER BY s.survivorID DESC"
+
+            cursor.execute(query, params)
+            results = cursor.fetchall()
 
         cursor.execute("SELECT COUNT(*) AS total FROM SurvivorRecord")
         total_survivors = cursor.fetchone()['total']
-        
+
         cursor.execute("SELECT COUNT(*) AS total FROM Facility")
         total_facilities = cursor.fetchone()['total']
-        
-        cursor.execute("SELECT COUNT(*) AS total FROM Flag WHERE flagStatus='Open'")
+
+        cursor.execute("SELECT COUNT(*) AS total FROM Flag WHERE flagStatus = 'Open'")
         total_flags = cursor.fetchone()['total']
 
         cursor.execute("SELECT COUNT(*) AS total FROM DisasterEvent")
@@ -131,12 +248,15 @@ def reviewer_dashboard():
 
     conn.close()
 
-    return render_template("reviewer_dashboard.html",
-        survivors=results, 
+    return render_template(
+        "reviewer_dashboard.html",
+        survivors=results,
         total_disasters=total_disasters,
         total_facilities=total_facilities,
         total_flags=total_flags,
-        total_survivors=total_survivors)
+        total_survivors=total_survivors,
+        searched=searched
+    )
 
 @app.route("/staff/dashboard")
 @login_required
@@ -214,6 +334,8 @@ def staff_dashboard():
     )
 
 @app.route("/staff/add-survivor", methods=["GET", "POST"])
+@login_required
+@role_required('responder','facility_staff')
 def add_survivor():
     conn = get_db()
 
@@ -262,6 +384,8 @@ def add_survivor():
 
 
 @app.route("/staff/add-transfer", methods=["GET", "POST"])
+@login_required
+@role_required('responder','facility_staff')
 def add_transfer():
     conn = get_db()
 
@@ -286,7 +410,7 @@ def add_transfer():
         to_facility_id = request.form.get("toFacilityID")
         note_text = request.form.get("noteText")
 
-        user_id = 301
+        user_id = session['user_id']
 
         with conn.cursor() as cursor:
             cursor.execute("SELECT COALESCE(MAX(transferID), 0) + 1 AS next_id FROM TransferEvent")
@@ -317,7 +441,7 @@ def add_transfer():
             conn.commit()
 
         conn.close()
-        return redirect(url_for("survivor_detail", survivor_id=survivor_id))
+        return redirect(url_for("staff_dashboard"))
 
     conn.close()
     return render_template(
@@ -328,6 +452,7 @@ def add_transfer():
 
 @app.route("/survivors/<int:survivor_id>")
 @login_required
+@role_required('reviewer')
 def survivor_detail(survivor_id):
     conn = get_db()
 
@@ -398,11 +523,13 @@ def survivor_detail(survivor_id):
                            current_location=current_location)
                            
 @app.route("/survivors/<int:survivor_id>/flags/create", methods=["POST"])
+@login_required
+@role_required('reviewer')
 def create_flag(survivor_id):
     conn=get_db()
 
     #temporary until login page is implemented
-    reviewer_user_id = 311
+    reviewer_user_id = session['user_id']
     flag_status = "Open"
     category = request.form.get("category")
     description =  request.form.get("description")
@@ -425,6 +552,8 @@ def create_flag(survivor_id):
 ##update flag status:
 
 @app.route("/flags/<int:flag_id>/status", methods=["POST"])
+@login_required
+@role_required('reviewer')
 def update_flag_status(flag_id):
     conn = get_db()
     new_status = request.form.get("flagStatus")
@@ -442,6 +571,7 @@ def update_flag_status(flag_id):
 
 
 @app.route("/survivors/<int:survivor_id>/status", methods=["POST"])
+@login_required
 def update_survivor_status(survivor_id):
     conn = get_db()
     new_status = request.form.get("status")
@@ -460,6 +590,8 @@ def update_survivor_status(survivor_id):
 
 ##remove flag:
 @app.route("/flags/<int:flag_id>/remove", methods=["POST"])
+@login_required
+@role_required('reviewer')
 def remove_flag(flag_id):
     conn = get_db()
     survivor_id = request.form.get("survivor_id")
@@ -474,6 +606,8 @@ def remove_flag(flag_id):
     return redirect(url_for("survivor_detail", survivor_id=survivor_id))
 
 @app.route("/transfers/<int:transfer_id>/delete", methods=["POST"])
+@login_required
+@role_required('responder', 'facility_staff')
 def delete_transfer(transfer_id):
     conn = get_db()
     survivor_id = request.form.get("survivor_id")
@@ -486,9 +620,11 @@ def delete_transfer(transfer_id):
         conn.commit()
 
     conn.close()
-    return redirect(url_for("survivor_detail", survivor_id=survivor_id))
+    return redirect(url_for("staff_dashboard"))
 
 @app.route("/disasters/<int:disaster_id>")
+@login_required
+@role_required('reviewer')
 def disaster_detail(disaster_id):
     conn = get_db()
     with conn.cursor() as cursor:
