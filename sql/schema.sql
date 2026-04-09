@@ -9,7 +9,7 @@ CREATE TABLE Users (
     lastName VARCHAR(100) NOT NULL,
     userEmail VARCHAR(100) NOT NULL UNIQUE,
     userPhoneNo VARCHAR(20) NOT NULL,
-    userPassword VARCHAR(255) NOT NULL UNIQUE,
+    userPassword VARCHAR(255) NOT NULL
 );
 
 CREATE TABLE Organization (
