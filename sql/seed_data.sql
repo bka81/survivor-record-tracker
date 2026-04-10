@@ -1,3 +1,4 @@
+USE survivor_record_tracking;
 INSERT IGNORE INTO Organization (orgID, orgType, orgName)
 VALUES
 (1, 'Government', 'Provincial Emergency Services'),
@@ -204,3 +205,4 @@ VALUES
 (6, 311, 106, 'Open', 'Unknown minor survivor requires identity follow-up', '2026-03-15 13:50:00', 'Missing Information'),
 (7, 312, 109, 'Open', 'Unidentified survivor may match another intake record', '2026-03-15 14:00:00', 'Duplicate Record'),
 (8, 313, 116, 'Resolved', 'Temporary alias reviewed and record verified', '2026-03-15 14:10:00', 'Verification');
+

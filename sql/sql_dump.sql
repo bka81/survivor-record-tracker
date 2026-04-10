@@ -98,6 +98,7 @@ CREATE TABLE Flag (
     CONSTRAINT flag_survivor_fk FOREIGN KEY (survivorID) REFERENCES SurvivorRecord(survivorID),
     CONSTRAINT check_flag_status CHECK (flagStatus IN ('Open', 'Resolved'))
 );
+
 INSERT INTO Organization (orgID, orgType, orgName)
 VALUES
 (1, 'Government', 'Provincial Emergency Services'),

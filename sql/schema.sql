@@ -109,3 +109,42 @@ FOREIGN KEY (transferID)
 REFERENCES TransferEvent(transferID)
 ON DELETE CASCADE;
 
+-- Trigger 1: Auto-resolve flags when survivor status changes to Reunited or Closed
+DELIMITER $$
+
+CREATE TRIGGER auto_resolve_flags
+AFTER UPDATE ON survivorrecord
+FOR EACH ROW
+BEGIN
+    IF NEW.status IN ('Reunited', 'Closed') THEN
+        UPDATE flag
+        SET flagStatus = 'Resolved'
+        WHERE survivorID = NEW.survivorID
+        AND flagStatus = 'Open';
+    END IF;
+END $$
+
+DELIMITER ;
+
+-- Trigger 2 : Prevent a transfer if survivor status is 'Closed'
+DELIMITER $$
+
+CREATE TRIGGER prevent_closed_transfer
+BEFORE INSERT ON transferevent
+FOR EACH ROW
+BEGIN
+    DECLARE survivor_status VARCHAR(50);
+    
+    SELECT status INTO survivor_status
+    FROM survivorrecord
+    WHERE survivorID = NEW.survivorID;
+    
+    IF survivor_status = 'Closed' THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Cannot transfer a survivor whose case is Closed';
+    END IF;
+END $$
+
+DELIMITER ;
+
+
