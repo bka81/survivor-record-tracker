@@ -649,7 +649,7 @@ def remove_flag(flag_id):
 
 @app.route("/transfers/<int:transfer_id>/delete", methods=["POST"])
 @login_required
-@role_required('responder', 'facility_staff')
+@role_required('reviewer')
 def delete_transfer(transfer_id):
     conn = get_db()
     survivor_id = request.form.get("survivor_id")
@@ -662,7 +662,7 @@ def delete_transfer(transfer_id):
         conn.commit()
 
     conn.close()
-    return redirect(url_for("staff_dashboard"))
+    return redirect(url_for("survivor_detail", survivor_id=survivor_id))
 
 @app.route("/disasters/<int:disaster_id>")
 @login_required
@@ -725,6 +725,8 @@ def disaster_detail(disaster_id):
                             WHERE t.userID = u.userID
                             AND t.survivorID = s.survivorID
                        )
+                
+                    
                 )
         """, (disaster_id,))
         division_staff = cursor.fetchall()
