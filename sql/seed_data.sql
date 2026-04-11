@@ -7,7 +7,6 @@ VALUES
 (4, 'Shelter', 'Community Shelter Network'),
 (5, 'Government', 'Municipal Fire Rescue');
 
-
 INSERT IGNORE INTO Users (userID, firstName, lastName, userEmail, userPhoneNo, userPassword)
 VALUES
 (301, 'Amina', 'Khan', 'amina.khan@example.com', '604-111-1001', 'amina123'),
@@ -40,7 +39,6 @@ VALUES
 (404, 'Transit Point D', '704 Cedar St', 5),
 (405, 'Mobile Aid Unit E', '705 Hill Dr', 2),
 (406, 'Local Intake Center F', '706 Bridge Ave', 4);
-
 
 INSERT IGNORE INTO Responder (userID, orgID)
 VALUES
@@ -205,4 +203,6 @@ VALUES
 (6, 311, 106, 'Open', 'Unknown minor survivor requires identity follow-up', '2026-03-15 13:50:00', 'Missing Information'),
 (7, 312, 109, 'Open', 'Unidentified survivor may match another intake record', '2026-03-15 14:00:00', 'Duplicate Record'),
 (8, 313, 116, 'Resolved', 'Temporary alias reviewed and record verified', '2026-03-15 14:10:00', 'Verification');
+
+
 

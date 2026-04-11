@@ -416,7 +416,6 @@ def add_survivor():
     conn.close()
     return render_template("add_survivor.html", disasters=disasters)
 
-
 @app.route("/staff/add-transfer", methods=["GET", "POST"])
 @login_required
 @role_required('responder','facility_staff')
@@ -446,36 +445,45 @@ def add_transfer():
 
         user_id = session['user_id']
 
-        with conn.cursor() as cursor:
-            cursor.execute("SELECT COALESCE(MAX(transferID), 0) + 1 AS next_id FROM TransferEvent")
-            result = cursor.fetchone()
-            next_id = result['next_id']
+        try:
+            with conn.cursor() as cursor:
+                cursor.execute("SELECT COALESCE(MAX(transferID), 0) + 1 AS next_id FROM TransferEvent")
+                result = cursor.fetchone()
+                next_id = result['next_id']
 
-            cursor.execute("""
-                INSERT INTO TransferEvent (
-                    transferID, survivorID, fromFacilityID, toFacilityID, userID, transferTime
-                )
-                VALUES (%s, %s, %s, %s, %s, NOW())
-            """, (
-                next_id,
-                survivor_id,
-                from_facility_id if from_facility_id else None,
-                to_facility_id,
-                user_id
-            ))
-
-            transfer_id = next_id
-
-            if note_text and note_text.strip():
                 cursor.execute("""
-                    INSERT INTO TransferNote (transferID, noteNo, noteText)
-                    VALUES (%s, 1, %s)
-                """, (transfer_id, note_text.strip()))
+                    INSERT INTO TransferEvent (
+                        transferID, survivorID, fromFacilityID, toFacilityID, userID, transferTime
+                    )
+                    VALUES (%s, %s, %s, %s, %s, NOW())
+                """, (
+                    next_id,
+                    survivor_id,
+                    from_facility_id if from_facility_id else None,
+                    to_facility_id,
+                    user_id
+                ))
 
-            conn.commit()
+                transfer_id = next_id
 
-        conn.close()
-        return redirect(url_for("staff_dashboard"))
+                if note_text and note_text.strip():
+                    cursor.execute("""
+                        INSERT INTO TransferNote (transferID, noteNo, noteText)
+                        VALUES (%s, 1, %s)
+                    """, (transfer_id, note_text.strip()))
+
+                conn.commit()
+            conn.close()
+            return redirect(url_for("staff_dashboard"))
+
+        except Exception as e:
+            conn.close()
+            return render_template(
+                "add_transfer.html",
+                survivors=survivors,
+                facilities=facilities,
+                error="Cannot transfer a survivor whose case is Closed!"
+            )
 
     conn.close()
     return render_template(

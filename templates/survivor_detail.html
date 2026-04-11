@@ -84,6 +84,8 @@
               <option value="Deceased" {% if survivor.status == 'Deceased' %}selected{% endif %}>Deceased</option>
               <option value="Unknown" {% if survivor.status == 'Unknown' %}selected{% endif %}>Unknown</option>
               <option value="Reunited" {% if survivor.status == 'Reunited' %}selected{% endif %}>Reunited</option>
+              <option value="Closed" {% if survivor.status == 'Closed' %}selected{% endif %}>Closed</option>
+
             </select>
             <button type="submit" 
                     class="border border-[var(--color-cyber)] px-4 py-1.5 text-sm text-[var(--color-cyber)] rounded-lg hover:brightness-110 transition-all">
