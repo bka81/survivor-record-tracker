@@ -699,11 +699,41 @@ def disaster_detail(disaster_id):
         """, (disaster_id,))
         stats = cursor.fetchone()
 
+        cursor.execute("""
+            SELECT
+                u.userID, u.firstName, u.lastName,
+                CASE
+                    WHEN r.userID IS NOT NULL THEN 'Responder'
+                    WHEN fs.userID IS NOT NULL THEN 'Facility Staff'
+                END AS role
+            FROM Users u 
+            LEFT JOIN Responder r ON u.userID = r.userID
+            LEFT JOIN FacilityStaff fs ON u.userID = fs.userID
+            WHERE (r.userID is NOT NULL OR fs.userID is NOT NULL)
+                AND NOT EXISTS(
+                    SELECT s.survivorID
+                    FROM SurvivorRecord s
+                    WHERE s.disasterID = %s
+                        AND EXISTS(
+                            SELECT 1 
+                            FROM Flag f
+                            WHERE f.survivorID = s.survivorID
+                       )
+                        AND NOT EXISTS(
+                            SELECT 1
+                            FROM TransferEvent t
+                            WHERE t.userID = u.userID
+                            AND t.survivorID = s.survivorID
+                       )
+                )
+        """, (disaster_id,))
+        division_staff = cursor.fetchall()
     conn.close()
     return render_template("disaster_detail.html", 
                            disaster=disaster, 
                            survivors=survivors,
-                           stats=stats)  # Removed duplicate return
+                           stats=stats,
+                           division_staff = division_staff)  
 
 @app.route("/db-test")
 def db_test():

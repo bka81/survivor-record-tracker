@@ -26,7 +26,7 @@
       <div class="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)]/60 p-6 border-l-4 border-l-[var(--color-success)]">
         <div class="flex justify-between items-center mb-2">
           <span class="text-[var(--color-muted)] text-sm font-medium">Total Survivors</span>
-          <span class="text-2xl">👤</span>
+          <span class="text-2xl"></span>
         </div>
         <div class="text-3xl font-bold text-[var(--color-success)]">{{ stats.total }}</div>
       </div>
@@ -35,7 +35,7 @@
       <div class="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)]/60 p-6 border-l-4 border-l-[var(--color-warning)]">
         <div class="flex justify-between items-center mb-2">
           <span class="text-[var(--color-muted)] text-sm font-medium">Minors</span>
-          <span class="text-2xl">❗</span>
+          <span class="text-2xl"></span>
         </div>
         <div class="text-3xl font-bold text-[var(--color-warning)]">{{ stats.minors }}</div>
       </div>
@@ -44,7 +44,7 @@
       <div class="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)]/60 p-6 border-l-4 border-l-[var(--color-cyber)]">
         <div class="flex justify-between items-center mb-2">
           <span class="text-[var(--color-muted)] text-sm font-medium">Active</span>
-          <span class="text-2xl">🟢</span>
+          <span class="text-2xl"></span>
         </div>
         <div class="text-3xl font-bold text-[var(--color-cyber)]">{{ stats.active }}</div>
       </div>
@@ -53,7 +53,7 @@
       <div class="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)]/60 p-6 border-l-4 border-l-[var(--color-danger)]">
         <div class="flex justify-between items-center mb-2">
           <span class="text-[var(--color-muted)] text-sm font-medium">Unknown</span>
-          <span class="text-2xl">❓</span>
+          <span class="text-2xl"></span>
         </div>
         <div class="text-3xl font-bold text-[var(--color-danger)]">{{ stats.unknown }}</div>
       </div>
@@ -108,6 +108,38 @@
                   View →
                 </a>
               </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% endif %}
+    </section>
+
+    <section class="rounded-2xl mt-10 border border-[var(--color-border)] bg-[var(--color-surface)]/60 p-4 shadow-[0_0_24px_rgba(0,255,65,0.08)] sm:p-6">
+      <h3 class="mb-6 text-lg text-[var(--color-matrix)] sm:text-xl">Staff members who handled every flagged survivor in this disaster</h3>
+
+      {% if division_staff|length == 0 %}
+      <p class="text-[var(--color-muted)]">No staff member handled every flagged survivor in this disaster.</p>
+      {% else %}
+      <div class="overflow-x-auto">
+        <table class="w-full">
+          <thead class="bg-[var(--color-bg-900)] border-b border-[var(--color-border)]">
+            <tr>
+              <th class="px-4 py-3 text-left font-mono text-xs uppercase tracking-widest text-[var(--color-muted)]">ID</th>
+              <th class="px-4 py-3 text-left font-mono text-xs uppercase tracking-widest text-[var(--color-muted)]">First Name</th>
+              <th class="px-4 py-3 text-left font-mono text-xs uppercase tracking-widest text-[var(--color-muted)]">Last Name</th>
+              <th class="px-4 py-3 text-left font-mono text-xs uppercase tracking-widest text-[var(--color-muted)]">Role</th>
+              
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-[var(--color-border)]">
+            {% for staff in division_staff %}
+            <tr class="hover:bg-[var(--color-bg-900)] transition-colors">
+              <td class="px-4 py-3 font-mono text-sm text-[var(--color-cyber)]">{{ staff.userID }}</td>
+              <td class="px-4 py-3 text-sm">{{ staff.firstName or '—' }}</td>
+              <td class="px-4 py-3 text-sm">{{ staff.lastName or '—' }}</td>
+              <td class="px-4 py-3 text-sm">{{ staff.role or '—' }}</td>
             </tr>
             {% endfor %}
           </tbody>
