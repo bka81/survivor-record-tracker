@@ -41,7 +41,6 @@ Before running the project locally, make sure you have the following installed:
 - Python 3
 - MySQL Server
 - Node.js and npm
-- Git (optional, if cloning from a repository)
 
 ---
 
